@@ -404,20 +404,20 @@
       
         
           
-            <h1 id="HDFS-Federation"><a href="#HDFS-Federation" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h1><blockquote>
-<p>HDFS Federation是Hadoop最新发布版本Hadoop-0.23.0中为解决HDFS单点故障而提出的namenode水平扩展方案。该方案允许HDFS创建多个namespace以提高集群的扩展性和隔离性。本篇文章主要介绍了HDFS Federation的设计动机和基本原理。</p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
 
 <ul>
 <li><strong>Namespace</strong> 管理目录，文件和数据块。它支持常见的文件系统操作，如创建文件，修改文件，删除文件等。</li>
 <li><strong>Block Storage</strong> 由两部分组成：<strong>Block Management</strong>维护集群中datanode的基本关系，它支持数据块相关的操作，如：创建数据块，删除数据块等，同时，它也会管理副本的复制和存放。<strong>Physical Storage</strong>存储实际的数据块并提供针对数据块的读写服务。</li>
 </ul>
 <p>以前的HDFS架构只允许一个集群拥有一个命名空间，一个Namenode管理着整个命名空间。HDFS Federation通过向HDFS增加多Namenode和namespace来解决这种限制。</p>
-<h2 id="HDFS-Federation-1"><a href="#HDFS-Federation-1" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h2><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation.gif" width="550" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+<h1 id="HDFS-Federation"><a href="#HDFS-Federation" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h1><blockquote>
+<p>HDFS Federation是Hadoop最新发布版本Hadoop-0.23.0中为解决HDFS单点故障而提出的namenode水平扩展方案。该方案允许HDFS创建多个namespace以提高集群的扩展性和隔离性。本篇文章主要介绍了HDFS Federation的设计动机和基本原理。</p>
+</blockquote>
+<div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation.gif" width="550" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图二<br></div>
 
 <p>为了水平扩展name service，Federation使用了独立的多Namenode/Namespaces的架构。这些namenode之间是联合的，也就是说，他们之间相互独立且不需要互相协调，各自分工，管理自己的区域。（The Namenodes are federated; the Namenodes are independent and do not require coordination with each other.）Datanode被用作是存储设备，在集群中，每一个Datanode都在Namenodes上注册。Datanodes周期性的发送心跳包和关于块的报告。Datanodes也要处理来自Namenodes的命令。</p>
-<h3 id="几个关键的概念"><a href="#几个关键的概念" class="headerlink" title="几个关键的概念"></a>几个关键的概念</h3><ul>
+<h2 id="几个关键的概念"><a href="#几个关键的概念" class="headerlink" title="几个关键的概念"></a>几个关键的概念</h2><ul>
 <li><strong>Block Pool</strong> 块池，一个Block Pool是属于同一个namespace下的一组块集合。每个datanode可能会存储集群中所有Block Pool的数据块。（Datanodes store blocks for all the block pools in the cluster.）每个Block Pool的管理是独立的。这样的好处是，允许一个namespace为一个新的块生成一个Block IDs，而不需要和其他的namespace进行协调。一个namenode挂掉了，不会影响其他namenode。</li>
 <li><strong>Namespace Volume</strong> 一个namespace和它的Block Pool一起被统称为Namespace Volume。它是管理的最小单元。当一个Namenode/namespace被删除之后，每个Datanode上相应的Block Pool也会被删除。每个Namespace Volume是升级的最小的一个单元。</li>
 <li><strong>ClusterID</strong> 一个新的标识ClusterID添加到集群，用来标记所有的Nodes，当Namenode格式化时(formated)，将会自动创建ClusterID，这个ID用来区分集群中的Namenodes。</li>
