@@ -328,6 +328,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hdfs/" itemprop="url" rel="index">
+                    <span itemprop="name">hdfs</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -368,15 +390,38 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+            <h1 id="HDFS-Federation"><a href="#HDFS-Federation" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h1><blockquote>
+<p>HDFS Federation是Hadoop最新发布版本Hadoop-0.23.0中为解决HDFS单点故障而提出的namenode水平扩展方案。该方案允许HDFS创建多个namespace以提高集群的扩展性和隔离性。本篇文章主要介绍了HDFS Federation的设计动机和基本原理。</p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+
+<ul>
+<li><strong>Namespace</strong> 管理目录，文件和数据块。它支持常见的文件系统操作，如创建文件，修改文件，删除文件等。</li>
+<li><strong>Block Storage</strong> 由两部分组成：<strong>Block Management</strong>维护集群中datanode的基本关系，它支持数据块相关的操作，如：创建数据块，删除数据块等，同时，它也会管理副本的复制和存放。<strong>Physical Storage</strong>存储实际的数据块并提供针对数据块的读写服务。</li>
+</ul>
+<p>以前的HDFS架构只允许一个集群拥有一个命名空间，一个Namenode管理着整个命名空间。HDFS Federation通过向HDFS增加多Namenode和namespace来解决这种限制。</p>
+<h2 id="HDFS-Federation-1"><a href="#HDFS-Federation-1" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h2><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation.gif" width="550" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+
+<p>为了水平扩展name service，Federation使用了独立的多Namenode/Namespaces的架构。这些namenode之间是联合的，也就是说，他们之间相互独立且不需要互相协调，各自分工，管理自己的区域。（The Namenodes are federated; the Namenodes are independent and do not require coordination with each other.）Datanode被用作是存储设备，在集群中，每一个Datanode都在Namenodes上注册。Datanodes周期性的发送心跳包和关于块的报告。Datanodes也要处理来自Namenodes的命令。</p>
+<h3 id="几个关键的概念"><a href="#几个关键的概念" class="headerlink" title="几个关键的概念"></a>几个关键的概念</h3><ul>
+<li><strong>Block Pool</strong> 块池，一个Block Pool是属于同一个namespace下的一组块集合。每个datanode可能会存储集群中所有Block Pool的数据块。（Datanodes store blocks for all the block pools in the cluster.）每个Block Pool的管理是独立的。这样的好处是，允许一个namespace为一个新的块生成一个Block IDs，而不需要和其他的namespace进行协调。一个namenode挂掉了，不会影响其他namenode。</li>
+<li><strong>Namespace Volume</strong> 一个namespace和它的Block Pool一起被统称为Namespace Volume。它是管理的最小单元。当一个Namenode/namespace被删除之后，每个Datanode上相应的Block Pool也会被删除。每个Namespace Volume是升级的最小的一个单元。</li>
+<li><strong>ClusterID</strong> 一个新的标识ClusterID添加到集群，用来标记所有的Nodes，当Namenode格式化时(formated)，将会自动创建ClusterID，这个ID用来区分集群中的Namenodes。</li>
+</ul>
+<h2 id="Namespace的管理"><a href="#Namespace的管理" class="headerlink" title="Namespace的管理"></a>Namespace的管理</h2><div align="center"><br> <img src="http://dongxicheng.org/wp-content/uploads/2011/12/client-side-mount-table.jpg" width="400" height="250" alt="图1" align="center"><br></div><br><div align="center"><br> 图三<br></div>
+
+<p>Federation中存在多个命名空间，如何划分和管理这些命名空间非常关键。在Federation中并采用“文件名hash”的方法，因为该方法的locality非常差，比如：查看某个目录下面的文件，如果采用文件名hash的方法存放文件，则这些文件可能被放到不同namespace中，HDFS需要访问所有namespace，代价过大。为了方便管理多个命名空间，HDFS Federation采用了经典的Client Side Mount Table。</p>
+<p>如图三所示，下面四个深色三角形代表一个独立的命名空间，上方浅色的三角形代表从客户角度去访问的子命名空间。各个深色的命名空间Mount到浅色的表中，客户可以访问不同的挂载点来访问不同的命名空间，这就如同在Linux系统中访问不同挂载点一样。这就是HDFS Federation中命名空间管理的基本原理：将各个命名空间挂载到全局mount-table中，就可以做将数据到全局共享；同样的命名空间挂载到个人的mount-table中，这就成为应用程序可见的命名空间视图。</p>
+<h2 id="HDFS-Federation的优势"><a href="#HDFS-Federation的优势" class="headerlink" title="HDFS Federation的优势"></a>HDFS Federation的优势</h2><ul>
+<li>命名空间的扩展.因为随着集群使用时间的加长,HDFS上存放的数据也将会越来越多.这个时候如果还是将所有的数据都往一个NameNode上存放,这个文件系统会显得非常的庞大.这时候我们可以进行横向扩展,把一些大的目录分离出去.使得每个NameNode下的数据看起来更加的精简。</li>
+<li>性能的提升.这个也很好理解.当NameNode所持有的数据量达到了一个非常大规模的量级的时候(比如超过1亿个文件),这个时候NameNode的处理效率可能就会有影响,它可能比较容易的会陷入一个繁忙的状态.而整个集群将会受限于一个单点NameNode的处理效率,从而影响集群整体的吞吐量.这个时候多NameNode机制显然可以减轻很多这部分的压力。</li>
+<li>资源的隔离.这一点考虑的就比较深了.通过多个命名空间,我们可以将关键数据文件目录移到不同的NameNode上,以此不让这些关键数据的读写操作受到其他普通文件读写操作的影响.也就是说这些NameNode将会只处理特定的关键的任务所发来的请求,而屏蔽了其他普通任务的文件读写请求,以此做到了资源的隔离.千万不要小看这一点,当你发现NameNode正在处理某个不良任务的大规模的请求操作导致响应速度极慢时,你一定会非常的懊恼。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/Federation.html" title="Apache Hadoop 2.7.2 – HDFS Federation" target="_blank" rel="external">https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/Federation.html</a></li>
+<li><a href="http://dongxicheng.org/mapreduce/hdfs-federation-introduction/" title="董的博客 » HDFS Federation设计动机与基本原理" target="_blank" rel="external">http://dongxicheng.org/mapreduce/hdfs-federation-introduction/</a></li>
+<li><a href="http://blog.csdn.net/androidlushangderen/article/details/52135506" title="HDFS Federation机制 - 走在前往架构师的路上" target="_blank" rel="external">http://blog.csdn.net/androidlushangderen/article/details/52135506</a></li>
+</ul>
 
           
         
@@ -457,7 +502,21 @@
           
 
           
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
 
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
           
 
         </nav>
