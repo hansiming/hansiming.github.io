@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="spark," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="概述RDD(Resilient Distributed Dataset)是一种不可变的分布式对象集合，每个RDD都被分为多个分区，这些分区都运行在集群的不同节点上。主要包含了两种操作  转化操作(transformations):从一个存在的RDD中创建一个新的RDD，比如map(),filter()。 行动操作(actions):向驱动器程序返回结果或把结果写入到外部系统的操作，会触发实际的计算">
+<meta name="keywords" content="spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark RDD 编程">
+<meta property="og:url" content="http://yoursite.com/2017/08/13/spark_rdd_program/index.html">
+<meta property="og:site_name" content="Han 博客">
+<meta property="og:description" content="概述RDD(Resilient Distributed Dataset)是一种不可变的分布式对象集合，每个RDD都被分为多个分区，这些分区都运行在集群的不同节点上。主要包含了两种操作  转化操作(transformations):从一个存在的RDD中创建一个新的RDD，比如map(),filter()。 行动操作(actions):向驱动器程序返回结果或把结果写入到外部系统的操作，会触发实际的计算">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-14T10:14:45.885Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark RDD 编程">
+<meta name="twitter:description" content="概述RDD(Resilient Distributed Dataset)是一种不可变的分布式对象集合，每个RDD都被分为多个分区，这些分区都运行在集群的不同节点上。主要包含了两种操作  转化操作(transformations):从一个存在的RDD中创建一个新的RDD，比如map(),filter()。 行动操作(actions):向驱动器程序返回结果或把结果写入到外部系统的操作，会触发实际的计算">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/13/spark_rdd_program/"/>
+
+
+
+
+
+  <title>Spark RDD 编程 | Han 博客</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61353e23b8e42a3b785fab01ab47ccba";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Han 博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/13/spark_rdd_program/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="韩思明">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Han 博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark RDD 编程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-13T20:22:35+08:00">
+                2017-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spark/" itemprop="url" rel="index">
+                    <span itemprop="name">spark</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>RDD(Resilient Distributed Dataset)是一种不可变的分布式对象集合，每个RDD都被分为多个分区，这些分区都运行在集群的不同节点上。主要包含了两种操作</p>
+<ul>
+<li>转化操作(transformations):从一个存在的RDD中创建一个新的RDD，比如map(),filter()。</li>
+<li>行动操作(actions):向驱动器程序返回结果或把结果写入到外部系统的操作，会触发实际的计算，比如count()和first()。</li>
+</ul>
+<h1 id="创建RDD"><a href="#创建RDD" class="headerlink" title="创建RDD"></a>创建RDD</h1><p>创建RDD主要包含如下两种方法</p>
+<ul>
+<li>读取外部数据</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">createRddFromExternalFile</span></span>(appName: <span class="type">String</span>, textFilePath: <span class="type">String</span>) = &#123;</div><div class="line"></div><div class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(appName))</div><div class="line">  sc.textFile(textFilePath)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>把一个已有的集合传给SparkContext的parallelize()方法</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">createRddByExistDataSet</span></span>(appName: <span class="type">String</span>) = &#123;</div><div class="line"></div><div class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(appName))</div><div class="line">  sc.parallelize(<span class="type">List</span>(<span class="string">"tank"</span>, <span class="string">"tanks"</span>))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="转化操作-transformations"><a href="#转化操作-transformations" class="headerlink" title="转化操作(transformations)"></a>转化操作(transformations)</h1><p>RDD的转化操作是返回新RDD的操作</p>
+<p>对一个数据{1，2，3，3}的RDD进行基本的RDD转化操作</p>
+<ul>
+<li>map() 将函数应用于RDD中的每个元素，将返回新的RDD</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.map(x =&gt; x+<span class="number">1</span>)</div><div class="line"><span class="comment">//返回&#123;2, 3, 4, 4&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>flatMap() 将函数应用于RDD中的每个元素，将返回的迭代器的所有元素构成的RDD。通常用于切分单词</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.map(x =&gt; x.to(<span class="number">3</span>))</div><div class="line"><span class="comment">//返回&#123;1，2，3，2，3，3，3&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>filter() 返回一个由通过传给filter()的函数的元素组成的RDD</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.filter( x =&gt; x != <span class="number">1</span> )</div><div class="line"><span class="comment">//返回 &#123;2，3，3&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>distinct() 去重</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.distinct()</div><div class="line"><span class="comment">//返回 &#123;1, 2, 3&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>sample(withRepalcement,fraction,[seed]) 对RDD采样 ，以及是否替换。withRepalcement 是否为放回（不重复），fraction 为数量。</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.sample(<span class="literal">false</span>, <span class="number">0.5</span>)</div><div class="line"><span class="comment">//返回 不确定的</span></div></pre></td></tr></table></figure>
+<p>对数据分别为rdd -&gt; {1，2，3}和other -&gt; {3，4，5} 的RDD 进行针对两个RDD的转化操作</p>
+<ul>
+<li>union() 生成 一个包含两个RDD 中所有元素的RDD </li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.union(other)</div><div class="line"><span class="comment">//返回 &#123;1，2，3，3，4，5&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>intersection() 求两个RDD共同的元素</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.intersection(other)</div><div class="line"><span class="comment">//返回 &#123;3&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>substract() 移除一个RDD中的内容（例如移除训练数据）</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.substract(other)</div><div class="line"><span class="comment">//返回 &#123;1,2&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>cartesian() 与另一个RDD的笛卡尔积</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.cartesian(other)</div><div class="line"><span class="comment">//返回 &#123;（1，3），（1，4），...&#125;</span></div></pre></td></tr></table></figure>
+<h1 id="行动操作-actions"><a href="#行动操作-actions" class="headerlink" title="行动操作(actions)"></a>行动操作(actions)</h1><p>把最终求得的结果返回到驱动器程序，或者写入外部存储系统</p>
+<p>对一个数据{1，2，3，3}的RDD进行基本的RDD行动操作</p>
+<ul>
+<li>collect() 返回RDD中的所有元素</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.collect()</div><div class="line"><span class="comment">//返回 &#123;1，2，3，3&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>count() RDD 中的元素个数  </li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.count()</div><div class="line"><span class="comment">//返回 4</span></div></pre></td></tr></table></figure>
+<ul>
+<li>countByValue() 各结果在RDD中出现的次数</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.countByValue()</div><div class="line"><span class="comment">//返回 &#123;（1，1），（2，1），（3，2）&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>take(num) 从RDD中返回num个元素</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.take(<span class="number">2</span>)</div><div class="line"><span class="comment">//返回 &#123;1，2&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>top(num) 从RDD中返回前面的num个元素</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.top(<span class="number">2</span>)</div><div class="line"><span class="comment">//返回 &#123;3，3&#125;</span></div></pre></td></tr></table></figure>
+<ul>
+<li><p>takeOrdered(num)(ordering) 从RDD中按照提供的顺序返回最前面的num个匀速</p>
+</li>
+<li><p>takeSample(withReplacement,num,[seed]) 从RDD中返回任意一些元素</p>
+</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.takeSample(<span class="literal">false</span>, <span class="number">2</span>)</div><div class="line"><span class="comment">//返回 不确定的</span></div></pre></td></tr></table></figure>
+<ul>
+<li>reduce(func) 并行整合RDD中的所有数据 </li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.reduce((x,y) =&gt; x+y)</div><div class="line"><span class="comment">//返回 9</span></div></pre></td></tr></table></figure>
+<ul>
+<li>fold(zero)(func) 和reduce 一样，但是需要提供初始值</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.fold(<span class="number">0</span>)((x,y) =&gt; x+y)</div><div class="line"><span class="comment">//返回 9</span></div></pre></td></tr></table></figure>
+<ul>
+<li>aggregate(zeroValue)(seq0p,comb0p) 和reduce 类似但是通常返回不同的数据</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//第一个函数的作用是把RDD中的元素合并起来放入累加器</span></div><div class="line"><span class="comment">//第二个函数的作用是：考虑到每个节点是在本地进行累加的，最后还需要提供一个函数将两个累加器进行两两和合并</span></div><div class="line">rdd.aggregate((<span class="number">0</span>,<span class="number">0</span>))((x,y) =&gt; (x._1 + y,x._2 +<span class="number">1</span> ),(x,y) =&gt; (x._1 + y._1, x._2 + y._2)) </div><div class="line"><span class="comment">//返回 (9, 4)</span></div></pre></td></tr></table></figure>
+<ul>
+<li>foreach(func) 对RDD 中的每个元素使用给定的函数 </li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.foreach(func)</div><div class="line"><span class="comment">//返回 不确定的</span></div></pre></td></tr></table></figure>
+<h1 id="惰性求值"><a href="#惰性求值" class="headerlink" title="惰性求值"></a>惰性求值</h1><p>惰性求值意味着当我们对RDD调用转化操作(例如调用map())时，操作不会立即执行。相反，Spark会在内部记录下所要求执行的操作的相关信息。我们不应该把RDD看做存放着待定数据的数据集，而最好把每个RDD当作我们通过转化操作构建出来的，记录如何计算数据的指令列表。把数据读取到RDD的操作也同样是惰性的。因此，当我们调用sc.textFile()时，数据并没有读取进来，而是在必要时才会读取。和转化操作一样得失，读取数据的操作也有可能会多次执行。</p>
+<h1 id="持久化-缓存"><a href="#持久化-缓存" class="headerlink" title="持久化(缓存)"></a>持久化(缓存)</h1><p>RDD是惰性求值的，而有时我们希望能多次使用同一个RDD，为了避免多次计算同一个RDD，可以让Spark对数据进行<strong>持久化</strong>。</p>
+<p>Spark最重要的一个功能是它可以通过各种操作（operations）持久化（或者缓存）一个集合到内存中。当你持久化一个RDD的时候，每一个节点都将参与计算的所有分区数据存储到内存中，并且这些 数据可以被这个集合（以及这个集合衍生的其他集合）的动作（action）重复利用。这个能力使后续的动作速度更快（通常快10倍以上）。对应迭代算法和快速的交互使用来说，缓存是一个关键的工具。</p>
+<p>你能通过<code>persist()</code>或者<code>cache()</code>方法持久化一个rdd。首先，在action中计算得到rdd；然后，将其保存在每个节点的内存中。Spark的缓存是一个容错的技术，如果RDD的任何一个分区丢失，它 可以通过原有的转换（transformations）操作自动的重复计算并且创建出这个分区。</p>
+<p>此外，我们可以利用不同的存储级别存储每一个被持久化的RDD。例如，它允许我们持久化集合到磁盘上、将集合作为序列化的Java对象持久化到内存中、在节点间复制集合或者存储集合到 Tachyon中。我们可以通过传递一个<code>StorageLevel</code>对象给<code>persist()</code>方法设置这些存储级别。<code>cache()</code>方法使用了默认的存储级别<code>StorageLevel.MEMORY_ONLY</code>。完整的存储级别介绍如下所示：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Storage Level</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">MEMORY_ONLY</td>
+<td style="text-align:left">将RDD作为非序列化的Java对象存储在jvm中。如果RDD不适合存在内存中，一些分区将不会被缓存，从而在每次需要这些分区时都需重新计算它们。这是系统默认的存储级别。</td>
+</tr>
+<tr>
+<td style="text-align:left">MEMORY_AND_DISK</td>
+<td style="text-align:left">将RDD作为非序列化的Java对象存储在jvm中。如果RDD不适合存在内存中，将这些不适合存在内存中的分区存储在磁盘中，每次需要时读出它们。</td>
+</tr>
+<tr>
+<td style="text-align:left">MEMORY_ONLY_SER</td>
+<td style="text-align:left">将RDD作为序列化的Java对象存储（每个分区一个byte数组）。这种方式比非序列化方式更节省空间，特别是用到快速的序列化工具时，但是会更耗费cpu资源—密集的读操作。</td>
+</tr>
+<tr>
+<td style="text-align:left">MEMORY_AND_DISK_SER</td>
+<td style="text-align:left">和MEMORY_ONLY_SER类似，但不是在每次需要时重复计算这些不适合存储到内存中的分区，而是将这些分区存储到磁盘中。</td>
+</tr>
+<tr>
+<td style="text-align:left">DISK_ONLY</td>
+<td style="text-align:left">仅仅将RDD分区存储到磁盘中</td>
+</tr>
+<tr>
+<td style="text-align:left">MEMORY_ONLY_2, MEMORY_AND_DISK_2, etc.</td>
+<td style="text-align:left">和上面的存储级别类似，但是复制每个分区到集群的两个节点上面</td>
+</tr>
+<tr>
+<td style="text-align:left">OFF_HEAP (experimental)</td>
+<td style="text-align:left">以序列化的格式存储RDD到Tachyon中。相对于MEMORY_ONLY_SER，OFF_HEAP减少了垃圾回收的花费，允许更小的执行者共享内存池。这使其在拥有大量内存的环境下或者多并发应用程序的环境中具有更强的吸引力。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="如何选择存储级别"><a href="#如何选择存储级别" class="headerlink" title="如何选择存储级别"></a>如何选择存储级别</h2><p>Spark的多个存储级别意味着在内存利用率和cpu利用效率间的不同权衡。我们推荐通过下面的过程选择一个合适的存储级别：</p>
+<ul>
+<li>如果你的RDD适合默认的存储级别（MEMORY_ONLY），就选择默认的存储级别。因为这是cpu利用率最高的选项，会使RDD上的操作尽可能的快。</li>
+<li>如果不适合用默认的级别，选择MEMORY_ONLY_SER。选择一个更快的序列化库提高对象的空间使用率，但是仍能够相当快的访问。</li>
+<li>除非函数计算RDD的花费较大或者它们需要过滤大量的数据，不要将RDD存储到磁盘上，否则，重复计算一个分区就会和重磁盘上读取数据一样慢。</li>
+<li>如果你希望更快的错误恢复，可以利用重复(replicated)存储级别。所有的存储级别都可以通过重复计算丢失的数据来支持完整的容错，但是重复的数据能够使你在RDD上继续运行任务，而不需要重复计算丢失的数据。</li>
+<li>在拥有大量内存的环境中或者多应用程序的环境中，OFF_HEAP具有如下优势：<ul>
+<li>它运行多个执行者共享Tachyon中相同的内存池</li>
+<li>它显著地减少垃圾回收的花费</li>
+<li>如果单个的执行者崩溃，缓存的数据不会丢失</li>
+</ul>
+</li>
+</ul>
+<h2 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h2><p>Spark自动的监控每个节点缓存的使用情况，利用最近最少使用原则删除老旧的数据。如果你想手动的删除RDD，可以使用<code>RDD.unpersist()</code>方法</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/spark/" rel="tag"># spark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/11/spark_word_count/" rel="next" title="Spark中的Hello World项目Word Count">
+                <i class="fa fa-chevron-left"></i> Spark中的Hello World项目Word Count
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="韩思明" />
+          <p class="site-author-name" itemprop="name">韩思明</p>
+           
+              <p class="site-description motion-element" itemprop="description">专注于大数据，云计算，Java后端</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hansiming" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#创建RDD"><span class="nav-number">2.</span> <span class="nav-text">创建RDD</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#转化操作-transformations"><span class="nav-number">3.</span> <span class="nav-text">转化操作(transformations)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#行动操作-actions"><span class="nav-number">4.</span> <span class="nav-text">行动操作(actions)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#惰性求值"><span class="nav-number">5.</span> <span class="nav-text">惰性求值</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#持久化-缓存"><span class="nav-number">6.</span> <span class="nav-text">持久化(缓存)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#如何选择存储级别"><span class="nav-number">6.1.</span> <span class="nav-text">如何选择存储级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除数据"><span class="nav-number">6.2.</span> <span class="nav-text">删除数据</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">韩思明</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
