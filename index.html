@@ -311,7 +311,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/14/spark_pair_rdd/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/15/spark_pair_rdd/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="韩思明">
@@ -330,7 +330,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/08/14/spark_pair_rdd/" itemprop="url">Spark Pair RDD 键值对操作</a></h1>
+                <a class="post-title-link" href="/2017/08/15/spark_pair_rdd/" itemprop="url">Spark Pair RDD 键值对操作</a></h1>
         
 
         <div class="post-meta">
@@ -342,8 +342,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-14T20:22:35+08:00">
-                2017-08-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-15T20:22:35+08:00">
+                2017-08-15
               </time>
             
 
@@ -469,7 +469,7 @@
 <h3 id="combineByKey"><a href="#combineByKey" class="headerlink" title="combineByKey()"></a>combineByKey()</h3><div align="center"><br> <img src="/images/spark_pair_rdd_2.png" width="800" height="350" alt="图二" align="center"><br></div><br><div align="center"><br> 图二<br></div>
 
 <p>如图二所示，如果这是一个新的元素， combineByKey() 会使用一个叫作 createCombiner() 的函数来创建那个键对应的累加器的初始值。 如果这是一个在处理当前分区之前已经遇到的键， 它会使用mergeValue() 方法将该键的累加器对应的当前值与这个新的值进行合并。由于每个分区都是独立处理的， 因此对于同一个键可以有多个累加器。如果有两个或者更多的分区都有对应同一个键的累加器， 就需要使用用户提供的 mergeCombiners() 方法将各个分区的结果进行合并。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> result = rdd.combineByKey(</div><div class="line">     (v) =&gt; (v, <span class="number">1</span>),</div><div class="line">     (acc: (<span class="type">Int</span>, <span class="type">Int</span>), v) =&gt; (acc._1 + v, acc._2 + <span class="number">1</span>),</div><div class="line">     (acc1: (<span class="type">Int</span>, <span class="type">Int</span>), acc2: (<span class="type">Int</span>, <span class="type">Int</span>)) =&gt; (acc1._1 + acc2._1, acc1._2 + acc2._2))</div><div class="line">     .map&#123;</div><div class="line">       <span class="keyword">case</span> (key, value) =&gt; (key, value._1 / value._2.toFloat)</div><div class="line">     &#125;</div><div class="line">   result.collectAsMap().map(println(_))</div></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> result = rdd.combineByKey(</div><div class="line">    (v) =&gt; (v, <span class="number">1</span>),</div><div class="line">    (acc: (<span class="type">Int</span>, <span class="type">Int</span>), v) =&gt; (acc._1 + v, acc._2 + <span class="number">1</span>),</div><div class="line">    (acc1: (<span class="type">Int</span>, <span class="type">Int</span>), acc2: (<span class="type">Int</span>, <span class="type">Int</span>)) =&gt; (acc1._1 + acc2._1, acc1._2 + acc2._2))</div><div class="line">    .map&#123;</div><div class="line">      <span class="keyword">case</span> (key, value) =&gt; (key, value._1 / value._2.toFloat)</div><div class="line">    &#125;</div><div class="line">  result.collectAsMap().map(println(_))</div></pre></td></tr></table></figure>
 <h2 id="并行度"><a href="#并行度" class="headerlink" title="并行度"></a>并行度</h2><p>每个 RDD 都有固定数目的分区，分区数决定了在 RDD 上执行操作时的并行度。在执行聚合或分组操作时， 可以要求 Spark 使用给定的分区数。上面讨论的大多数操作符都能接收第二个参数， 这个参数用来指定分组结果或聚合结果的RDD 的分区数。</p>
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//使用默认并行度</span></div><div class="line">rdd.reduceByKey((x, y) =&gt; y + <span class="number">1</span>)</div><div class="line"><span class="comment">//设置并行度为10</span></div><div class="line">rdd.reduceByKey((x, y) =&gt; y + <span class="number">1</span>, <span class="number">10</span>)</div></pre></td></tr></table></figure>
 <h2 id="数据分组"><a href="#数据分组" class="headerlink" title="数据分组"></a>数据分组</h2><ul>
@@ -505,6 +505,10 @@
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//这里创建了自定义分区</span></div><div class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(...)</div><div class="line"><span class="keyword">val</span> userData = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">UserInfo</span>](<span class="string">"hdfs://..."</span>)</div><div class="line">  .partitionBy(<span class="keyword">new</span> <span class="type">HashPartitioner</span>(<span class="number">100</span>)) <span class="comment">// 构造100个分区</span></div><div class="line">  .persist()</div><div class="line"><span class="comment">//python是这样使用的： rdd.partitionBy(100)</span></div></pre></td></tr></table></figure>
 <p>在 processNewLogs() 中， eventsRDD 是 本 地 变量，只在该方法中使用了一次， 所以为 events 指定分区方式没有什么用处。由于在构建 userData 时调用了 partitionBy()， Spark 就知道了该 RDD 是根据键的哈希值来分区的，这样在调用 join() 时， Spark 就会利用到这一点。具体来说，当调用 userData.join(events) 时， Spark 只会对 events 进行数据混洗操作，将 events 中特定 UserID 的记录发送到 userData 的对应分区所在的那台机器上）。这样，需要通过网络传输的数据就大大减少了，程序运行速度可以显著提升了。这种方式的额网络通信图如下所示。注意上面需要将partitionBy的结果持久化，不进行持久化会导致整个 RDD 谱系图重新求值。那样的话， partitionBy() 带来的好处就会被抵消，导致重复对数据进行分区以及跨节点的混洗，和没有指定分区方式时发生的情况十分相似。</p>
 <div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-3de9ca6517698707.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图五" align="center"><br></div><br><div align="center"><br> 图五<br></div>
+
+<h2 id="影响分区方式的操作"><a href="#影响分区方式的操作" class="headerlink" title="影响分区方式的操作"></a>影响分区方式的操作</h2><p>会为生成的结果 RDD 设好分区方式的操作：<code>cogroup()、 groupWith()、join()、 lef tOuterJoin()、 rightOuterJoin()、 groupByKey()、reduceByKey()、combineByKey()、 partitionBy()、 sort()、 mapValues()（如果父 RDD 有分区方式的话）、flatMapValues()</code>对于二元操作，输出数据的分区方式取决于父 RDD 的分区方式。默认情况下，结果会采用哈希分区， 分区的数量和操作的并行度一样。不过，如果其中的一个父 RDD 已经设置过分区方式， 那么结果就会采用那种分区方式；如果两个父 RDD 都设置过分区方式，结果 RDD 会采用第一个父 RDD 的分区方式。</p>
+<h2 id="自定义分区"><a href="#自定义分区" class="headerlink" title="自定义分区"></a>自定义分区</h2><p>Spark内部提供了HashPartitioner和RangePartitioner两种分区策略(这两种分区的代码解析可以参见：《Spark分区器HashPartitioner和RangePartitioner代码详解》)，这两种分区策略在很多情况下都适合我们的场景。但是有些情况下，Spark内部不能符合咱们的需求，这时候我们就可以自定义分区策略。为此，Spark提供了相应的接口，我们只需要扩展Partitioner抽象类。</p>
+
           
         
       
