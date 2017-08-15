@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="spark," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。 创建Pair RDD在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可">
+<meta name="keywords" content="spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark Pair RDD 键值对操作">
+<meta property="og:url" content="http://yoursite.com/2017/08/14/spark_pair_rdd/index.html">
+<meta property="og:site_name" content="Han 博客">
+<meta property="og:description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。 创建Pair RDD在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/images/spark_pair_rdd_1.jpg">
+<meta property="og:image" content="http://yoursite.com/images/spark_pair_rdd_2.png">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/5593513-98844d200b521443.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/5593513-227dfccabba70350.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/5593513-3de9ca6517698707.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2017-08-15T09:49:00.258Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark Pair RDD 键值对操作">
+<meta name="twitter:description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。 创建Pair RDD在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可">
+<meta name="twitter:image" content="http://yoursite.com/images/spark_pair_rdd_1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/14/spark_pair_rdd/"/>
+
+
+
+
+
+  <title>Spark Pair RDD 键值对操作 | Han 博客</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61353e23b8e42a3b785fab01ab47ccba";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Han 博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/14/spark_pair_rdd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="韩思明">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Han 博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark Pair RDD 键值对操作</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-14T20:22:35+08:00">
+                2017-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spark/" itemprop="url" rel="index">
+                    <span itemprop="name">spark</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。</p>
+<h1 id="创建Pair-RDD"><a href="#创建Pair-RDD" class="headerlink" title="创建Pair RDD"></a>创建Pair RDD</h1><p>在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可以调用map函数来实现，传递的函数需要返回键值对。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val arr = sc.parallelize(List(1, 2, 3, 3))</div><div class="line">arr: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val pairs = arr.map(x =&gt; (x, x + 1))</div><div class="line">pairs: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[1] at map at &lt;console&gt;:26</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">pairs.foreach(x =&gt; (println(x._1 + &quot; &quot; + x._2)))</div><div class="line">2 3</div><div class="line">3 4</div><div class="line">1 2</div><div class="line">3 4</div></pre></td></tr></table></figure>
+<h1 id="Pair-RDD的转化操作"><a href="#Pair-RDD的转化操作" class="headerlink" title="Pair RDD的转化操作"></a>Pair RDD的转化操作</h1><p>由于pair RDD中包含二元组，所以需要传递函数应当操作二元组而不是独立的元素，假设键值对集合为{(1,2),(3,4),(3,6)}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val pairs = sc.parallelize(List((1, 2), (3, 4), (3,6)))</div><div class="line">pairs: org.apache.spark.rdd.RDD[(Int, Int)] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
+<ul>
+<li>reduceByKey(func) 合并具有相同key的value值</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.reduceByKey((x,y)=&gt;x+y)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = ShuffledRDD[14] at reduceByKey at &lt;console&gt;:29  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(1,2)  </div><div class="line">(3,10)</div></pre></td></tr></table></figure>
+<ul>
+<li>groupByKey() 对具有相同键的进行分组 [数据分组]</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.groupByKey()</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Iterable[Int])] = ShuffledRDD[1] at groupByKey at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,CompactBuffer(4, 6))</div><div class="line">(1,CompactBuffer(2))</div></pre></td></tr></table></figure>
+<ul>
+<li>mapValues(func) 对pairRDD中的每个值应用func 键不改变</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.mapValues(x =&gt; x + 1)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[2] at mapValues at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,5)</div><div class="line">(1,3)</div><div class="line">(3,7)</div></pre></td></tr></table></figure>
+<ul>
+<li>flatMapValues(func) 类似于mapValues，返回的是迭代器函数</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.flatMapValues(x =&gt; x to 5)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[3] at flatMapValues at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,4)</div><div class="line">(3,5)</div><div class="line">(1,2)</div><div class="line">(1,3)</div><div class="line">(1,4)</div><div class="line">(1,5)</div></pre></td></tr></table></figure>
+<ul>
+<li>keys 返回一个仅包含键的RDD，该方法不应该有括号</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.keys</div><div class="line">result: org.apache.spark.rdd.RDD[Int] = MapPartitionsRDD[4] at keys at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">1</div><div class="line">3</div><div class="line">3</div></pre></td></tr></table></figure>
+<ul>
+<li>values 返回一个仅包含value的RDD，该方法不应该有括号</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.values</div><div class="line">result: org.apache.spark.rdd.RDD[Int] = MapPartitionsRDD[5] at values at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">4</div><div class="line">6</div><div class="line">2</div></pre></td></tr></table></figure>
+<ul>
+<li>sortByKey() 返回一个根据键排序的RDD</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.sortByKey()</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = ShuffledRDD[8] at sortByKey at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,4)</div><div class="line">(3,6)</div><div class="line">(1,2)</div></pre></td></tr></table></figure>
+<p>针对两个pair RDD 的转化操作  假设：rdd={(1,2),(3,4),(3,6)} other={(3,9)}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">scala&gt; val rdd = sc.parallelize(List((1, 2), (3, 4), (3,6)))</div><div class="line">rdd: org.apache.spark.rdd.RDD[(Int, Int)] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div><div class="line"></div><div class="line">scala&gt; val other = sc.parallelize(List((3, 9)))</div><div class="line">other: org.apache.spark.rdd.RDD[(Int, Int)] = ParallelCollectionRDD[1] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
+<ul>
+<li>subtractByKey( other ) 删除掉RDD中与other RDD中键相同的元素</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.subtractByKey(other)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = SubtractedRDD[2] at subtractByKey at &lt;console&gt;:28</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(1,2)</div></pre></td></tr></table></figure>
+<ul>
+<li>join( other ) 对两个RDD进行内连接</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.join(other)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Int, Int))] = MapPartitionsRDD[5] at join at &lt;console&gt;:28</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,(4,9))</div><div class="line">(3,(6,9))</div></pre></td></tr></table></figure>
+<ul>
+<li>rightOuterJoin(other) 对两个RDD进行连接操作，确保第二个RDD的键必须存在（右外连接）</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.rightOuterJoin(other)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Option[Int], Int))] = MapPartitionsRDD[15] at rightOuterJoin at &lt;console&gt;:31  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(3,(Some(4),9))  </div><div class="line">(3,(Some(6),9))</div></pre></td></tr></table></figure>
+<ul>
+<li>leftOuterJoin(other) 对两个RDD进行连接操作，确保第一个RDD的键必须存在（左外连接）</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.leftOuterJoin(other)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Int, Option[Int]))] = MapPartitionsRDD[18] at leftOuterJoin at &lt;console&gt;:31  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(3,(4,Some(9)))  </div><div class="line">(3,(6,Some(9)))  </div><div class="line">(1,(2,None))</div></pre></td></tr></table></figure>
+<ul>
+<li>cogroup(other) 将有两个rdd中拥有相同键的数据分组</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.cogroup(other)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Iterable[Int], Iterable[Int]))] = MapPartitionsRDD[20] at cogroup at &lt;console&gt;:31  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(1,(CompactBuffer(2),CompactBuffer()))  </div><div class="line">(3,(CompactBuffer(4, 6),CompactBuffer(9)))</div></pre></td></tr></table></figure>
+<h2 id="聚合操作"><a href="#聚合操作" class="headerlink" title="聚合操作"></a>聚合操作</h2><p>当数据以键值对形式组织的时候，聚合具有相同键的元素进行一些统计是很常见的一些操作。</p>
+<h3 id="reduceByKey"><a href="#reduceByKey" class="headerlink" title="reduceByKey()"></a>reduceByKey()</h3><p>与reduce()相当类似，它们都接收一个函数，并使用该函数对进行合并。下面是使用reduceByKey()和mapValues()来计算每个键的对应值的平均值的例子。</p>
+<div align="center"><br> <img src="/images/spark_pair_rdd_1.jpg" width="800" height="350" alt="图一" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">scala&gt; val rdd = sc.parallelize(List((&quot;panda&quot;, 0), (&quot;pink&quot;, 3), (&quot;pirate&quot;, 3), (&quot;panda&quot;, 1), (&quot;pink&quot;, 4)))</div><div class="line">rdd: org.apache.spark.rdd.RDD[(String, Int)] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div><div class="line"></div><div class="line">scala&gt; val result = rdd.mapValues(x =&gt; (x, 1)).reduceByKey((x, y) =&gt; (x._1 + y._1, x._2 + x._2))</div><div class="line">result: org.apache.spark.rdd.RDD[(String, (Int, Int))] = ShuffledRDD[2] at reduceByKey at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(pirate,(3,1))</div><div class="line">(panda,(1,2))</div><div class="line">(pink,(7,2))</div></pre></td></tr></table></figure>
+<h3 id="combineByKey"><a href="#combineByKey" class="headerlink" title="combineByKey()"></a>combineByKey()</h3><div align="center"><br> <img src="/images/spark_pair_rdd_2.png" width="800" height="350" alt="图二" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+
+<p>如图二所示，如果这是一个新的元素， combineByKey() 会使用一个叫作 createCombiner() 的函数来创建那个键对应的累加器的初始值。 如果这是一个在处理当前分区之前已经遇到的键， 它会使用mergeValue() 方法将该键的累加器对应的当前值与这个新的值进行合并。由于每个分区都是独立处理的， 因此对于同一个键可以有多个累加器。如果有两个或者更多的分区都有对应同一个键的累加器， 就需要使用用户提供的 mergeCombiners() 方法将各个分区的结果进行合并。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> result = rdd.combineByKey(</div><div class="line">     (v) =&gt; (v, <span class="number">1</span>),</div><div class="line">     (acc: (<span class="type">Int</span>, <span class="type">Int</span>), v) =&gt; (acc._1 + v, acc._2 + <span class="number">1</span>),</div><div class="line">     (acc1: (<span class="type">Int</span>, <span class="type">Int</span>), acc2: (<span class="type">Int</span>, <span class="type">Int</span>)) =&gt; (acc1._1 + acc2._1, acc1._2 + acc2._2))</div><div class="line">     .map&#123;</div><div class="line">       <span class="keyword">case</span> (key, value) =&gt; (key, value._1 / value._2.toFloat)</div><div class="line">     &#125;</div><div class="line">   result.collectAsMap().map(println(_))</div></pre></td></tr></table></figure>
+<h2 id="并行度"><a href="#并行度" class="headerlink" title="并行度"></a>并行度</h2><p>每个 RDD 都有固定数目的分区，分区数决定了在 RDD 上执行操作时的并行度。在执行聚合或分组操作时， 可以要求 Spark 使用给定的分区数。上面讨论的大多数操作符都能接收第二个参数， 这个参数用来指定分组结果或聚合结果的RDD 的分区数。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//使用默认并行度</span></div><div class="line">rdd.reduceByKey((x, y) =&gt; y + <span class="number">1</span>)</div><div class="line"><span class="comment">//设置并行度为10</span></div><div class="line">rdd.reduceByKey((x, y) =&gt; y + <span class="number">1</span>, <span class="number">10</span>)</div></pre></td></tr></table></figure>
+<h2 id="数据分组"><a href="#数据分组" class="headerlink" title="数据分组"></a>数据分组</h2><ul>
+<li>groupByKey() 对于一个由类型 K 的键和类型 V 的值组成的 RDD，所得到的结果 RDD 类型会是[K, Iterable[V]]。</li>
+</ul>
+<blockquote>
+<p>如果程序中先使用了groupByKey() 然后再使用了 reduce() 或者fold() 的代码，很可能可以通过使用一种根据键进行聚合的函数来更高效地实现同样的效果。例如， rdd.reduceByKey(func)与 rdd.groupByKey().mapValues(value =value.reduce(func)) 等价，但是前者更为高效，因为它避免了为每个键创建存放值的列表的步骤。</p>
+</blockquote>
+<ul>
+<li>groupBy() 可以用于未成对的数据上，也可以根据除键相同以外的条件进行分组。它可以接收一个函数，对源 RDD 中的每个元素使用该函数，将返回结果作为键再进行分组。</li>
+<li>cogroup() 对多个共享同一个键的 RDD 进行分组。两个键的类型均为 K 而值的类型分别为 V 和 W 的 RDD 进行cogroup() 时，得到的结果 RDD 类型为 [(K, (Iterable[V], Iterable[W]))]。注意后面这个方括号中的是两个迭代对象。</li>
+</ul>
+<h2 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h2><ul>
+<li><p>join 只有在两个 pair RDD 中都存在的键才叫输出。</p>
+</li>
+<li><p>leftOuterJoin 源 RDD 的每一个键都有对应的记录。每个键相应的值是由一个源 RDD 中的值与一个包含第二个 RDD 的值的 Option（在 Java 中为Optional）对象组成的二元组。在 Python 中，如果一个值不存在，则使用 None 来表示；而数据存在时就用常规的值来表示， 不使用任何封装。</p>
+</li>
+<li>rightOuterJoin 只不过预期结果中的键必须出现在第二个 RDD 中，而二元组中的可缺失的部分则来自于源 RDD 而非第二个 RDD。</li>
+</ul>
+<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><ul>
+<li>sortByKey 接收一个叫作 ascending 的参数，表示我们是否想要让结果按升序排序，下面是一个例子</li>
+</ul>
+<h1 id="Pair-RDD的行动操作"><a href="#Pair-RDD的行动操作" class="headerlink" title="Pair RDD的行动操作"></a>Pair RDD的行动操作</h1><div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-98844d200b521443.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图三" align="center"><br></div><br><div align="center"><br> 图三<br></div>
+
+<h1 id="数据分区"><a href="#数据分区" class="headerlink" title="数据分区"></a>数据分区</h1><p>Spark 程序可以通过控制RDD 分区方式来减少通信开销。 分区并不是对所有应用都有好处的——比如，如果给定RDD 只需要被扫描一次， 我们完全没有必要对其预先进行分区处理。只有当数据集多次在诸如连接这种基于键的操作中使用时， 分区才会有帮助。</p>
+<p>Spark 中所有的键值对 RDD 都可以进行分区。系统会根据一个针对键的函数对元素进行分组。Spark 没有给出显示控制每个键具体落在哪一个工作节点上的方法（部分原因是Spark 即使在某些节点失败时依然可以工作），但 Spark 可以确保同一组的键出现在同一个节点上。</p>
+<p>一个例子：内存中保存着一张很大的用户信息表——一个由 (UserID, UserInfo) 对组成的 RDD，其中 UserInfo 包含一个该用户所订阅的主题的列表。 该应用会周期性地将这张表与一个小文件进行组合，这个小文件中存着过去五分钟内发生的事件——其实就是一个由 (UserID, LinkInfo) 对组成的表，存放着过去五分钟内某网站各用户的访问情况。我们需要对用户访问其未订阅主题的页面的情况进行统计。下面首先是未分区的Scala程序例子：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 初始化代码；从HDFS商的一个Hadoop SequenceFile中读取用户信息</span></div><div class="line"><span class="comment">// userData中的元素会根据它们被读取时的来源，即HDFS块所在的节点来分布</span></div><div class="line"><span class="comment">// Spark此时无法获知某个特定的UserID对应的记录位于哪个节点上</span></div><div class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(...)</div><div class="line"><span class="keyword">val</span> userData = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">UserInfo</span>](<span class="string">"hdfs://..."</span>).persist()</div><div class="line"><span class="comment">// 周期性调用函数来处理过去五分钟产生的事件日志</span></div><div class="line"><span class="comment">// 假设这是一个包含(UserID, LinkInfo)对的SequenceFile</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">processNewLogs</span></span>(logFileName: <span class="type">String</span>) &#123;</div><div class="line"><span class="keyword">val</span> events = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">LinkInfo</span>](logFileName)</div><div class="line"><span class="keyword">val</span> joined = userData.join(events)<span class="comment">// RDD of (UserID, (UserInfo, LinkInfo)) pairs</span></div><div class="line"><span class="keyword">val</span> offTopicVisits = joined.filter &#123;</div><div class="line">  <span class="keyword">case</span> (userId, (userInfo, linkInfo)) =&gt; <span class="comment">// Expand the tuple into its components</span></div><div class="line">    !userInfo.topics.contains(linkInfo.topic)</div><div class="line">&#125;.count()</div><div class="line">  println(<span class="string">"Number of visits to non-subscribed topics: "</span> + offTopicVisits)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>对上面的代码，每次调用 processNewLogs() 时都会用到 join() 操作，而我们对数据集是如何分区的却一无所知。接操作会将两个数据集中的所有键的哈希值都求出来， 将该哈希值相同的记录通过网络传到同一台机器上，然后在那台机器上对所有键相同的记录进行连接操作。因为 userData 表比每五分钟出现的访问日志表 events 要大得多，所以要浪费时间做很多额外工作：在每次调用时都对 userData 表进行哈希值计算和跨节点数据混洗，虽然这些数据从来都不会变化。其网络通信图如下所示：</p>
+<div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-227dfccabba70350.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图四" align="center"><br></div><br><div align="center"><br> 图四<br></div>
+
+<p>更改上面的代码</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//这里创建了自定义分区</span></div><div class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(...)</div><div class="line"><span class="keyword">val</span> userData = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">UserInfo</span>](<span class="string">"hdfs://..."</span>)</div><div class="line">  .partitionBy(<span class="keyword">new</span> <span class="type">HashPartitioner</span>(<span class="number">100</span>)) <span class="comment">// 构造100个分区</span></div><div class="line">  .persist()</div><div class="line"><span class="comment">//python是这样使用的： rdd.partitionBy(100)</span></div></pre></td></tr></table></figure>
+<p>在 processNewLogs() 中， eventsRDD 是 本 地 变量，只在该方法中使用了一次， 所以为 events 指定分区方式没有什么用处。由于在构建 userData 时调用了 partitionBy()， Spark 就知道了该 RDD 是根据键的哈希值来分区的，这样在调用 join() 时， Spark 就会利用到这一点。具体来说，当调用 userData.join(events) 时， Spark 只会对 events 进行数据混洗操作，将 events 中特定 UserID 的记录发送到 userData 的对应分区所在的那台机器上）。这样，需要通过网络传输的数据就大大减少了，程序运行速度可以显著提升了。这种方式的额网络通信图如下所示。注意上面需要将partitionBy的结果持久化，不进行持久化会导致整个 RDD 谱系图重新求值。那样的话， partitionBy() 带来的好处就会被抵消，导致重复对数据进行分区以及跨节点的混洗，和没有指定分区方式时发生的情况十分相似。</p>
+<div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-3de9ca6517698707.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图五" align="center"><br></div><br><div align="center"><br> 图五<br></div>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/spark/" rel="tag"># spark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/13/spark_rdd_program/" rel="next" title="Spark RDD 编程">
+                <i class="fa fa-chevron-left"></i> Spark RDD 编程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="韩思明" />
+          <p class="site-author-name" itemprop="name">韩思明</p>
+           
+              <p class="site-description motion-element" itemprop="description">专注于大数据，云计算，Java后端</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hansiming" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#创建Pair-RDD"><span class="nav-number">2.</span> <span class="nav-text">创建Pair RDD</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pair-RDD的转化操作"><span class="nav-number">3.</span> <span class="nav-text">Pair RDD的转化操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#聚合操作"><span class="nav-number">3.1.</span> <span class="nav-text">聚合操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#reduceByKey"><span class="nav-number">3.1.1.</span> <span class="nav-text">reduceByKey()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#combineByKey"><span class="nav-number">3.1.2.</span> <span class="nav-text">combineByKey()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#并行度"><span class="nav-number">3.2.</span> <span class="nav-text">并行度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据分组"><span class="nav-number">3.3.</span> <span class="nav-text">数据分组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接"><span class="nav-number">3.4.</span> <span class="nav-text">连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排序"><span class="nav-number">3.5.</span> <span class="nav-text">排序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pair-RDD的行动操作"><span class="nav-number">4.</span> <span class="nav-text">Pair RDD的行动操作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据分区"><span class="nav-number">5.</span> <span class="nav-text">数据分区</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">韩思明</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
