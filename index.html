@@ -311,6 +311,189 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/21/carbon_data_file_strcture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="韩思明">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Han 博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/08/21/carbon_data_file_strcture/" itemprop="url">Carbon Data 文件结构</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-21T20:01:17+08:00">
+                2017-08-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/carbon-data/" itemprop="url" rel="index">
+                    <span itemprop="name">carbon data</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Carbon-Data-Structure"><a href="#Carbon-Data-Structure" class="headerlink" title="Carbon Data Structure"></a>Carbon Data Structure</h1><blockquote>
+<p>Apache CarbonData file contains groups of data called blocklet, along with all required information like schema, offsets and indices, etc, in a file footer.</p>
+</blockquote>
+<p>Apache CarbonData 文件包含一组称为blocklet的数据组，在文件的尾部，存储着所有的必要信息，包括Schema，offset，indices等等</p>
+<blockquote>
+<p>The file footer can be read once to build the indices in memory, which can be utilized for optimizing the scans and processing for all subsequent queries.</p>
+</blockquote>
+<p>读一次file footer就可以在内存中构建索引，可用于优化所有后续查询的扫描和处理。</p>
+<blockquote>
+<p>Each blocklet in the file is further divided into chunks of data called Data Chunks. Each data chunk is organised either in a columnar format or a row format, and stores the data of either in a single column or a set of columns. All blocklets in one file contain the same number and type of Data Chunks.</p>
+</blockquote>
+<p>在文件中的每个blocklet在后续会被划分成称为Data Chunks的数据组。每个data chunk都可以被用列格式或者行格式所组织(???)，在data chunk中存储了一列或者多个列。在一个文件中的所有blocklet都包含了相同数目和类型的data chunks。</p>
+<div align="center"><br> <img src="https://lh5.googleusercontent.com/iRA2X9m4ex6tjaOfjnXgMHtnFghOc3NTPom2zUQ0TG4rSUw-IHDg5iHTPixKbbSGWx13kre4NBfUpwGRfX4z-csW2tGm_ykQyNhEeJ58_TvS-TiVADVZyds-P3w6YewvY4N5iCNh" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+
+<div align="center"><br> <img src="https://lh6.googleusercontent.com/-sOUDQecvT2NXNSEsWcL_JCtuZxt9F7BXxLzeAxNUoMxmmx8PoEfkYou8Re50zYHkKl5eWnk3BXgJKDs7NIEhZBUzFWjrFMZ58-B1diHfs6jDdzKSuySCMoRAVfvHegcsTBeaE8Q" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+
+<h2 id="Block"><a href="#Block" class="headerlink" title="Block"></a>Block</h2><blockquote>
+<p> It would be as same as HDFS block, CarbonData creates one file for each data block, user can specify TABLE_BLOCKSIZE during creation table. Each file contains File Header, Blocklets and File Footer.</p>
+</blockquote>
+<p>类似于HDFS的block，Carbondata为每一个data block创建了一个文件，用户在创建table的时候可以指定TABLE_BLOCKSIZE的大小。每一个文件包含了FileHeader，Blocklets和File Footer。</p>
+<div align="center"><br> <img src="/public/images/carbondata1.png" width="800" height="350" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
+
+<h2 id="File-Header"><a href="#File-Header" class="headerlink" title="File Header"></a>File Header</h2><blockquote>
+<p>It contains CarbonData file version number, list of column schema and schema updation timestamp.</p>
+</blockquote>
+<p>File Header包含了file version number，每一列Schema的列表，Schema更新的时间。</p>
+<h2 id="File-Footer"><a href="#File-Footer" class="headerlink" title="File Footer"></a>File Footer</h2><blockquote>
+<p>it contains Number of rows, segmentinfo ,all blocklets? info and index, you can find the detail from the below diagram.</p>
+</blockquote>
+<p>File Footer包含了行的个数，段的信息，所有的blocklets的信息和索引。</p>
+<h2 id="Blocklet"><a href="#Blocklet" class="headerlink" title="Blocklet"></a>Blocklet</h2><blockquote>
+<p>Rows are grouped to form a blocklet, the size of the blocklet is configurable and default size is 64MB, Blocklet contains Column Page groups for each column.</p>
+</blockquote>
+<p>Blocklet是很多行数据的集合，他的大小是可以配置的，默认大小是64M，Blocklet包含了每列的Column Page Groups。</p>
+<h3 id="Column-Page-Group"><a href="#Column-Page-Group" class="headerlink" title="Column Page Group"></a>Column Page Group</h3><blockquote>
+<p>Data of one column and it is further divided into pages, it is guaranteed to be contiguous in file.</p>
+</blockquote>
+<p>一列的数据，进而会被分配进Page里面，它不需保证在一个文件里面是连续的。</p>
+<h3 id="Page"><a href="#Page" class="headerlink" title="Page"></a>Page</h3><blockquote>
+<p>It has the data of one column and the number of row is fixed to 32000 size.</p>
+</blockquote>
+<p>Page里面有一列的数据，行数限制为32000。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/15/spark_pair_rdd/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1646,7 +1829,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1657,7 +1840,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1668,7 +1851,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
