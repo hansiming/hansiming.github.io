@@ -112,22 +112,25 @@
 
 
 
-<meta name="description" content="Carbon Data Structure Apache CarbonData file contains groups of data called blocklet, along with all required information like schema, offsets and indices, etc, in a file footer.  Apache CarbonData 文件">
+<meta name="description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
 <meta name="keywords" content="carbon data">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Carbon Data 文件结构">
-<meta property="og:url" content="http://yoursite.com/2017/08/21/carbon_data_file_strcture/index.html">
+<meta property="og:title" content="Carbon Data 多级索引">
+<meta property="og:url" content="http://yoursite.com/2017/08/22/carbon_data_index/index.html">
 <meta property="og:site_name" content="Han 博客">
-<meta property="og:description" content="Carbon Data Structure Apache CarbonData file contains groups of data called blocklet, along with all required information like schema, offsets and indices, etc, in a file footer.  Apache CarbonData 文件">
+<meta property="og:description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://lh5.googleusercontent.com/iRA2X9m4ex6tjaOfjnXgMHtnFghOc3NTPom2zUQ0TG4rSUw-IHDg5iHTPixKbbSGWx13kre4NBfUpwGRfX4z-csW2tGm_ykQyNhEeJ58_TvS-TiVADVZyds-P3w6YewvY4N5iCNh">
-<meta property="og:image" content="https://lh6.googleusercontent.com/-sOUDQecvT2NXNSEsWcL_JCtuZxt9F7BXxLzeAxNUoMxmmx8PoEfkYou8Re50zYHkKl5eWnk3BXgJKDs7NIEhZBUzFWjrFMZ58-B1diHfs6jDdzKSuySCMoRAVfvHegcsTBeaE8Q">
-<meta property="og:image" content="http://yoursite.com/images/carbondata1.png">
-<meta property="og:updated_time" content="2017-08-21T12:26:44.577Z">
+<meta property="og:image" content="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU">
+<meta property="og:image" content="https://lh3.googleusercontent.com/sUh-7DFdi3kXFhEwWfLfw2K4NM5EdQklscpejsCI5-Oovc5xvgtKUR-HwDKMUP0qQz38ueLc9OqKgLbRebWi7Q3hWT8eXm-qmfB-qIThAB8Thg1_1QP1IL05flACYlpKczCTTcuK">
+<meta property="og:image" content="https://lh4.googleusercontent.com/vfAcqPor6uTSVswber5_7v6aWqHFPU34gtEU8WcE7m1XwJRMGiGyxajqXwk_yveOK6EDIagIBy39f6yR0N9AxwDQLAaFvqU1WTSLuvneTxOmkSRNdjoz7t2bdNmtk8TKoOf4CvB8">
+<meta property="og:image" content="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb">
+<meta property="og:image" content="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv">
+<meta property="og:image" content="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN">
+<meta property="og:updated_time" content="2017-08-22T04:01:50.342Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Carbon Data 文件结构">
-<meta name="twitter:description" content="Carbon Data Structure Apache CarbonData file contains groups of data called blocklet, along with all required information like schema, offsets and indices, etc, in a file footer.  Apache CarbonData 文件">
-<meta name="twitter:image" content="https://lh5.googleusercontent.com/iRA2X9m4ex6tjaOfjnXgMHtnFghOc3NTPom2zUQ0TG4rSUw-IHDg5iHTPixKbbSGWx13kre4NBfUpwGRfX4z-csW2tGm_ykQyNhEeJ58_TvS-TiVADVZyds-P3w6YewvY4N5iCNh">
+<meta name="twitter:title" content="Carbon Data 多级索引">
+<meta name="twitter:description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU">
 
 
 
@@ -156,13 +159,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/08/21/carbon_data_file_strcture/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/08/22/carbon_data_index/"/>
 
 
 
 
 
-  <title>Carbon Data 文件结构 | Han 博客</title>
+  <title>Carbon Data 多级索引 | Han 博客</title>
   
 
 
@@ -315,7 +318,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/21/carbon_data_file_strcture/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/22/carbon_data_index/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="韩思明">
@@ -332,7 +335,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Carbon Data 文件结构</h1>
+          <h1 class="post-title" itemprop="name headline">Carbon Data 多级索引</h1>
         
 
         <div class="post-meta">
@@ -344,8 +347,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-21T20:01:17+08:00">
-                2017-08-21
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-22T20:22:01+08:00">
+                2017-08-22
               </time>
             
 
@@ -404,49 +407,53 @@
       
 
       
-        <h1 id="Carbon-Data-Structure"><a href="#Carbon-Data-Structure" class="headerlink" title="Carbon Data Structure"></a>Carbon Data Structure</h1><blockquote>
-<p>Apache CarbonData file contains groups of data called blocklet, along with all required information like schema, offsets and indices, etc, in a file footer.</p>
+        <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
+<p>Apache CarbonData has Rich Multi-Level Index Support.</p>
 </blockquote>
-<p>Apache CarbonData 文件包含一组称为blocklet的数据组，在文件的尾部，存储着所有的必要信息，包括Schema，offset，indices等等</p>
+<p>Apache CarbonData有丰富的多级索引支持。</p>
+<h1 id="DESCRIPTION-描述"><a href="#DESCRIPTION-描述" class="headerlink" title="DESCRIPTION 描述"></a>DESCRIPTION 描述</h1><blockquote>
+<p>Apache CarbonData uses multiple indexes at various levels to enable faster search and query processing.</p>
+</blockquote>
+<p>Apache CarbonData使用多个级别的索引来实现更快的搜索和查询处理。</p>
 <blockquote>
-<p>The file footer can be read once to build the indices in memory, which can be utilized for optimizing the scans and processing for all subsequent queries.</p>
+<p>Using indexes, we can efficiently find the position of the data that is  required while skipping the parts of data that are not required (need not be processed) and hence results in faster query processing.</p>
 </blockquote>
-<p>读一次file footer就可以在内存中构建索引，可用于优化所有后续查询的扫描和处理。</p>
+<p>使用索引，我们能更有效的找到数据的位置，因为我们能跳过我们不需要的数据，因此会加速查询操作。</p>
 <blockquote>
-<p>Each blocklet in the file is further divided into chunks of data called Data Chunks. Each data chunk is organised either in a columnar format or a row format, and stores the data of either in a single column or a set of columns. All blocklets in one file contain the same number and type of Data Chunks.</p>
+<p>Storing data along with index significantly accelerates query performance and reduces the I/O scans and CPU resources in case of filters in the query. CarbonData index consists of multiple levels of indices, a processing framework can leverage this index to reduce the number of tasks it needs to schedule and process. It can also do skip scan in more fine grained units (called blocklet) in task side scanning instead of scanning the whole file.</p>
 </blockquote>
-<p>在文件中的每个blocklet在后续会被划分成称为Data Chunks的数据组。每个data chunk都可以被用列格式或者行格式所组织(???)，在data chunk中存储了一列或者多个列。在一个文件中的所有blocklet都包含了相同数目和类型的data chunks。</p>
-<div align="center"><br> <img src="https://lh5.googleusercontent.com/iRA2X9m4ex6tjaOfjnXgMHtnFghOc3NTPom2zUQ0TG4rSUw-IHDg5iHTPixKbbSGWx13kre4NBfUpwGRfX4z-csW2tGm_ykQyNhEeJ58_TvS-TiVADVZyds-P3w6YewvY4N5iCNh" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+<p>存储数据的时候使用索引，能够明显的提高查询性能，减少I/O扫描和CPU资源，因为在查询的时候，很多数据会被过滤。CarbonData的索引由多级索引组成，处理框架可以利用这个索引去减少很多需要调度和处理的任务。它也可以从一侧开始更细粒度的去扫描blocklet，而不是扫描整个文件。</p>
+<p>To get data using indexing, the steps followed are :</p>
+<ul>
+<li>File Pruning. 文件修剪</li>
+<li>Blocklet Pruning. Blocklet修剪</li>
+<li>Binary search using Inverted Index. 使用倒序索引进行二分查找</li>
+</ul>
+<h1 id="TYPES-OF-INDEXES"><a href="#TYPES-OF-INDEXES" class="headerlink" title="TYPES OF INDEXES"></a>TYPES OF INDEXES</h1><h2 id="Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing"><a href="#Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing" class="headerlink" title="Index stored in file footer(enables two level of B+ tree indexing):"></a>Index stored in file footer(enables two level of B+ tree indexing):</h2><p>索引存储在file footer(两种级别的B+树索引)</p>
+<ul>
+<li>Table level index: global B+ tree, efficient file level filtering.Searching for the file, using the table level index.These files will be further used, to get the row-groups(Data Blocks) using the file level index.</li>
+</ul>
+<p>表级别的索引：全局的B+树，高效的文件级别过滤。在文件中检索，使用表级别的索引。这些文件将会别进一步利用，使用文件级索引去得到row-groups(Data Blocks)。</p>
+<div align="center"><br> <img src="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU" width="800" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
 
-<div align="center"><br> <img src="https://lh6.googleusercontent.com/-sOUDQecvT2NXNSEsWcL_JCtuZxt9F7BXxLzeAxNUoMxmmx8PoEfkYou8Re50zYHkKl5eWnk3BXgJKDs7NIEhZBUzFWjrFMZ58-B1diHfs6jDdzKSuySCMoRAVfvHegcsTBeaE8Q" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+<ul>
+<li>File level index: local B+ tree,  efficient blocklet level filtering</li>
+</ul>
+<p>文件级别的索引，本地的B+树，高效的blocklet级别过滤。</p>
+<div align="center"><br> <img src="https://lh3.googleusercontent.com/sUh-7DFdi3kXFhEwWfLfw2K4NM5EdQklscpejsCI5-Oovc5xvgtKUR-HwDKMUP0qQz38ueLc9OqKgLbRebWi7Q3hWT8eXm-qmfB-qIThAB8Thg1_1QP1IL05flACYlpKczCTTcuK" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
 
-<h2 id="Block"><a href="#Block" class="headerlink" title="Block"></a>Block</h2><blockquote>
-<p> It would be as same as HDFS block, CarbonData creates one file for each data block, user can specify TABLE_BLOCKSIZE during creation table. Each file contains File Header, Blocklets and File Footer.</p>
-</blockquote>
-<p>类似于HDFS的block，Carbondata为每一个data block创建了一个文件，用户在创建table的时候可以指定TABLE_BLOCKSIZE的大小。每一个文件包含了FileHeader，Blocklets和File Footer。</p>
-<div align="center"><br> <img src="/images/carbondata1.png" width="800" height="350" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
+<p>Global Multi Dimensional Keys(MDK) based B+Tree Index for all non- measure columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
+<p>依据B+Tree索引的全局的Multi Dimensional Keys(MDK)帮助为测量的列去快速定位包含搜索/过滤条件匹配的数据的row groups（Data Blocks）。</p>
+<div align="center"><br> <img src="https://lh4.googleusercontent.com/vfAcqPor6uTSVswber5_7v6aWqHFPU34gtEU8WcE7m1XwJRMGiGyxajqXwk_yveOK6EDIagIBy39f6yR0N9AxwDQLAaFvqU1WTSLuvneTxOmkSRNdjoz7t2bdNmtk8TKoOf4CvB8" width="800" height="600" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
 
-<h2 id="File-Header"><a href="#File-Header" class="headerlink" title="File Header"></a>File Header</h2><blockquote>
-<p>It contains CarbonData file version number, list of column schema and schema updation timestamp.</p>
-</blockquote>
-<p>File Header包含了file version number，每一列Schema的列表，Schema更新的时间。</p>
-<h2 id="File-Footer"><a href="#File-Footer" class="headerlink" title="File Footer"></a>File Footer</h2><blockquote>
-<p>it contains Number of rows, segmentinfo ,all blocklets? info and index, you can find the detail from the below diagram.</p>
-</blockquote>
-<p>File Footer包含了行的个数，段的信息，所有的blocklets的信息和索引。</p>
-<h2 id="Blocklet"><a href="#Blocklet" class="headerlink" title="Blocklet"></a>Blocklet</h2><blockquote>
-<p>Rows are grouped to form a blocklet, the size of the blocklet is configurable and default size is 64MB, Blocklet contains Column Page groups for each column.</p>
-</blockquote>
-<p>Blocklet是很多行数据的集合，他的大小是可以配置的，默认大小是64M，Blocklet包含了每列的Column Page Groups。</p>
-<h3 id="Column-Page-Group"><a href="#Column-Page-Group" class="headerlink" title="Column Page Group"></a>Column Page Group</h3><blockquote>
-<p>Data of one column and it is further divided into pages, it is guaranteed to be contiguous in file.</p>
-</blockquote>
-<p>一列的数据，进而会被分配进Page里面，它不需保证在一个文件里面是连续的。</p>
-<h3 id="Page"><a href="#Page" class="headerlink" title="Page"></a>Page</h3><blockquote>
-<p>It has the data of one column and the number of row is fixed to 32000 size.</p>
-</blockquote>
-<p>Page里面有一列的数据，行数限制为32000。</p>
+<p>Min-Max Index for all columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
+<p>Min-Max索引帮助所有列去快速定位到包含搜索/过滤条件匹配的数据的row group(Data Blocks)</p>
+<div align="center"><br> <img src="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb" width="800" height="600" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
 
+<h2 id="Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描"><a href="#Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描" class="headerlink" title="Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描"></a>Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描</h2><div align="center"><br> <img src="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv" width="800" height="300" alt="图5" align="center"><br></div><br><div align="center"><br> 图五<br></div>
+
+<p>Data Block level Inverted Index for all columns aids in quickly locating the rows that contain the data matching search/filter criteria within a row group(Data Blocks).</p>
+<div align="center"><br> <img src="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN" width="800" height="300" alt="图6" align="center"><br></div><br><div align="center"><br> 图六<br></div>
       
     </div>
     
@@ -476,8 +483,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/08/15/spark_pair_rdd/" rel="next" title="Spark Pair RDD 键值对操作">
-                <i class="fa fa-chevron-left"></i> Spark Pair RDD 键值对操作
+              <a href="/2017/08/21/carbon_data_file_strcture/" rel="next" title="Carbon Data 文件结构">
+                <i class="fa fa-chevron-left"></i> Carbon Data 文件结构
               </a>
             
           </div>
@@ -485,10 +492,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/08/22/carbon_data_index/" rel="prev" title="Carbon Data 多级索引">
-                Carbon Data 多级索引 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -635,7 +638,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Carbon-Data-Structure"><span class="nav-number">1.</span> <span class="nav-text">Carbon Data Structure</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Block"><span class="nav-number">1.1.</span> <span class="nav-text">Block</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-Header"><span class="nav-number">1.2.</span> <span class="nav-text">File Header</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-Footer"><span class="nav-number">1.3.</span> <span class="nav-text">File Footer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Blocklet"><span class="nav-number">1.4.</span> <span class="nav-text">Blocklet</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Column-Page-Group"><span class="nav-number">1.4.1.</span> <span class="nav-text">Column Page Group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page"><span class="nav-number">1.4.2.</span> <span class="nav-text">Page</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#INTRODUCTION-介绍"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION 介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DESCRIPTION-描述"><span class="nav-number">2.</span> <span class="nav-text">DESCRIPTION 描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TYPES-OF-INDEXES"><span class="nav-number">3.</span> <span class="nav-text">TYPES OF INDEXES</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing"><span class="nav-number">3.1.</span> <span class="nav-text">Index stored in file footer(enables two level of B+ tree indexing):</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描"><span class="nav-number">3.2.</span> <span class="nav-text">Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描</span></a></li></ol></li></ol></div>
             
 
           </div>

@@ -311,6 +311,193 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/22/carbon_data_index/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="韩思明">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Han 博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/08/22/carbon_data_index/" itemprop="url">Carbon Data 多级索引</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-22T20:22:01+08:00">
+                2017-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/carbon-data/" itemprop="url" rel="index">
+                    <span itemprop="name">carbon data</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
+<p>Apache CarbonData has Rich Multi-Level Index Support.</p>
+</blockquote>
+<p>Apache CarbonData有丰富的多级索引支持。</p>
+<h1 id="DESCRIPTION-描述"><a href="#DESCRIPTION-描述" class="headerlink" title="DESCRIPTION 描述"></a>DESCRIPTION 描述</h1><blockquote>
+<p>Apache CarbonData uses multiple indexes at various levels to enable faster search and query processing.</p>
+</blockquote>
+<p>Apache CarbonData使用多个级别的索引来实现更快的搜索和查询处理。</p>
+<blockquote>
+<p>Using indexes, we can efficiently find the position of the data that is  required while skipping the parts of data that are not required (need not be processed) and hence results in faster query processing.</p>
+</blockquote>
+<p>使用索引，我们能更有效的找到数据的位置，因为我们能跳过我们不需要的数据，因此会加速查询操作。</p>
+<blockquote>
+<p>Storing data along with index significantly accelerates query performance and reduces the I/O scans and CPU resources in case of filters in the query. CarbonData index consists of multiple levels of indices, a processing framework can leverage this index to reduce the number of tasks it needs to schedule and process. It can also do skip scan in more fine grained units (called blocklet) in task side scanning instead of scanning the whole file.</p>
+</blockquote>
+<p>存储数据的时候使用索引，能够明显的提高查询性能，减少I/O扫描和CPU资源，因为在查询的时候，很多数据会被过滤。CarbonData的索引由多级索引组成，处理框架可以利用这个索引去减少很多需要调度和处理的任务。它也可以从一侧开始更细粒度的去扫描blocklet，而不是扫描整个文件。</p>
+<p>To get data using indexing, the steps followed are :</p>
+<ul>
+<li>File Pruning. 文件修剪</li>
+<li>Blocklet Pruning. Blocklet修剪</li>
+<li>Binary search using Inverted Index. 使用倒序索引进行二分查找</li>
+</ul>
+<h1 id="TYPES-OF-INDEXES"><a href="#TYPES-OF-INDEXES" class="headerlink" title="TYPES OF INDEXES"></a>TYPES OF INDEXES</h1><h2 id="Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing"><a href="#Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing" class="headerlink" title="Index stored in file footer(enables two level of B+ tree indexing):"></a>Index stored in file footer(enables two level of B+ tree indexing):</h2><p>索引存储在file footer(两种级别的B+树索引)</p>
+<ul>
+<li>Table level index: global B+ tree, efficient file level filtering.Searching for the file, using the table level index.These files will be further used, to get the row-groups(Data Blocks) using the file level index.</li>
+</ul>
+<p>表级别的索引：全局的B+树，高效的文件级别过滤。在文件中检索，使用表级别的索引。这些文件将会别进一步利用，使用文件级索引去得到row-groups(Data Blocks)。</p>
+<div align="center"><br> <img src="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU" width="800" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+
+<ul>
+<li>File level index: local B+ tree,  efficient blocklet level filtering</li>
+</ul>
+<p>文件级别的索引，本地的B+树，高效的blocklet级别过滤。</p>
+<div align="center"><br> <img src="https://lh3.googleusercontent.com/sUh-7DFdi3kXFhEwWfLfw2K4NM5EdQklscpejsCI5-Oovc5xvgtKUR-HwDKMUP0qQz38ueLc9OqKgLbRebWi7Q3hWT8eXm-qmfB-qIThAB8Thg1_1QP1IL05flACYlpKczCTTcuK" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+
+<p>Global Multi Dimensional Keys(MDK) based B+Tree Index for all non- measure columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
+<p>依据B+Tree索引的全局的Multi Dimensional Keys(MDK)帮助为测量的列去快速定位包含搜索/过滤条件匹配的数据的row groups（Data Blocks）。</p>
+<div align="center"><br> <img src="https://lh4.googleusercontent.com/vfAcqPor6uTSVswber5_7v6aWqHFPU34gtEU8WcE7m1XwJRMGiGyxajqXwk_yveOK6EDIagIBy39f6yR0N9AxwDQLAaFvqU1WTSLuvneTxOmkSRNdjoz7t2bdNmtk8TKoOf4CvB8" width="800" height="600" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
+
+<p>Min-Max Index for all columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
+<p>Min-Max索引帮助所有列去快速定位到包含搜索/过滤条件匹配的数据的row group(Data Blocks)</p>
+<div align="center"><br> <img src="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb" width="800" height="600" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
+
+<h2 id="Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描"><a href="#Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描" class="headerlink" title="Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描"></a>Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描</h2><div align="center"><br> <img src="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv" width="800" height="300" alt="图5" align="center"><br></div><br><div align="center"><br> 图五<br></div>
+
+<p>Data Block level Inverted Index for all columns aids in quickly locating the rows that contain the data matching search/filter criteria within a row group(Data Blocks).</p>
+<div align="center"><br> <img src="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN" width="800" height="300" alt="图6" align="center"><br></div><br><div align="center"><br> 图六<br></div>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/21/carbon_data_file_strcture/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1829,7 +2016,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
