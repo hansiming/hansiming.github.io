@@ -112,25 +112,24 @@
 
 
 
-<meta name="description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
+<meta name="description" content="INTRODUCTION 介绍 Encoded data for reduced storage space and faster processing.  编码数据可以减少存储空间，加快处理的速度。 DESCRIPTION 描述 Most databases and big data SQL data stores employ columnar encoding to achieve data">
 <meta name="keywords" content="carbon data">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Carbon Data 多级索引">
-<meta property="og:url" content="http://yoursite.com/2017/08/22/carbon_data_index/index.html">
+<meta property="og:title" content="Carbon Data 字典编码">
+<meta property="og:url" content="http://yoursite.com/2017/08/23/carbon_data_dictionary_encoding/index.html">
 <meta property="og:site_name" content="Han 博客">
-<meta property="og:description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
+<meta property="og:description" content="INTRODUCTION 介绍 Encoded data for reduced storage space and faster processing.  编码数据可以减少存储空间，加快处理的速度。 DESCRIPTION 描述 Most databases and big data SQL data stores employ columnar encoding to achieve data">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU">
-<meta property="og:image" content="https://lh3.googleusercontent.com/sUh-7DFdi3kXFhEwWfLfw2K4NM5EdQklscpejsCI5-Oovc5xvgtKUR-HwDKMUP0qQz38ueLc9OqKgLbRebWi7Q3hWT8eXm-qmfB-qIThAB8Thg1_1QP1IL05flACYlpKczCTTcuK">
-<meta property="og:image" content="https://lh4.googleusercontent.com/vfAcqPor6uTSVswber5_7v6aWqHFPU34gtEU8WcE7m1XwJRMGiGyxajqXwk_yveOK6EDIagIBy39f6yR0N9AxwDQLAaFvqU1WTSLuvneTxOmkSRNdjoz7t2bdNmtk8TKoOf4CvB8">
-<meta property="og:image" content="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb">
-<meta property="og:image" content="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv">
-<meta property="og:image" content="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN">
-<meta property="og:updated_time" content="2017-08-22T04:01:50.342Z">
+<meta property="og:image" content="https://lh3.googleusercontent.com/2u3uVdaUii8Z0pzkxViXAeBuyByvn4yV-hL5O1NIlRIj8vBl569VVn9wuLvYo5ICCoKSZAPxEluJI4DyioKsUpdBsjBYu6-eFbiaE6FZXKBqmiqypeM0JBExRYNM8G9U531AI3eA">
+<meta property="og:image" content="https://lh3.googleusercontent.com/ssRao26snirAMtGJFFYJ7a7O7KLvBCJxiK5EPG6EosKZlAUtuHUxTJUC4JE4JJFq-l5hYZViWb4eFWfbwkwvuiEJYFWcc2Qw7Z3cWsBoFYoowxoe5CCcdXT44NOMFNdN0Nx_z9vu">
+<meta property="og:image" content="https://lh6.googleusercontent.com/q922bMoCmibQb_21chfktctW5qXarRQrAUwLkpwllc1PyAEW2L7Glw6hxUnRpSDYViTsjbbO9WoRWlpJLd-cUumEi5XJLcBu26b5lJ_uzdv49fN_uZPRpKB4Hma9CVviszhWsu23">
+<meta property="og:image" content="https://lh5.googleusercontent.com/gouuvmdINEm59ZJyJf1ZsV9oHzCvoVO2RsVFfdh6lIb6MMGfHFKHEcU7Es7JbnJ5baJ3ro85H-8xvna4rKTvjl9XtJ-JoJsnQuPD3hpUox3BCclon3EPx7yjWCY8o1FPLtqyS_On">
+<meta property="og:image" content="https://lh5.googleusercontent.com/s_GNQCobcsyD5tAs37SCzJEI-3Xn_TCtKAzzG3o_9Tt2GcWTLQHBpFE_o-hkTj5sjGeFE_13_8QcC18kkFAxL6mD_XFnfF8X9AumT71hUhncl1eJQjOf9SkPC0Bj4fdfoNjm6rEh">
+<meta property="og:updated_time" content="2017-08-23T03:30:27.757Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Carbon Data 多级索引">
-<meta name="twitter:description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
-<meta name="twitter:image" content="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU">
+<meta name="twitter:title" content="Carbon Data 字典编码">
+<meta name="twitter:description" content="INTRODUCTION 介绍 Encoded data for reduced storage space and faster processing.  编码数据可以减少存储空间，加快处理的速度。 DESCRIPTION 描述 Most databases and big data SQL data stores employ columnar encoding to achieve data">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/2u3uVdaUii8Z0pzkxViXAeBuyByvn4yV-hL5O1NIlRIj8vBl569VVn9wuLvYo5ICCoKSZAPxEluJI4DyioKsUpdBsjBYu6-eFbiaE6FZXKBqmiqypeM0JBExRYNM8G9U531AI3eA">
 
 
 
@@ -159,13 +158,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/08/22/carbon_data_index/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/08/23/carbon_data_dictionary_encoding/"/>
 
 
 
 
 
-  <title>Carbon Data 多级索引 | Han 博客</title>
+  <title>Carbon Data 字典编码 | Han 博客</title>
   
 
 
@@ -318,7 +317,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/22/carbon_data_index/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/23/carbon_data_dictionary_encoding/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="韩思明">
@@ -335,7 +334,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Carbon Data 多级索引</h1>
+          <h1 class="post-title" itemprop="name headline">Carbon Data 字典编码</h1>
         
 
         <div class="post-meta">
@@ -347,8 +346,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-22T20:22:01+08:00">
-                2017-08-22
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-23T19:15:01+08:00">
+                2017-08-23
               </time>
             
 
@@ -408,52 +407,39 @@
 
       
         <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
-<p>Apache CarbonData has Rich Multi-Level Index Support.</p>
+<p>Encoded data for reduced storage space and faster processing.</p>
 </blockquote>
-<p>Apache CarbonData有丰富的多级索引支持。</p>
+<p>编码数据可以减少存储空间，加快处理的速度。</p>
 <h1 id="DESCRIPTION-描述"><a href="#DESCRIPTION-描述" class="headerlink" title="DESCRIPTION 描述"></a>DESCRIPTION 描述</h1><blockquote>
-<p>Apache CarbonData uses multiple indexes at various levels to enable faster search and query processing.</p>
+<p>Most databases and big data SQL data stores employ columnar encoding to achieve data compression by storing small integer numbers (surrogate values) instead of full string values. However, almost all existing databases and data stores divide the data into row groups containing anywhere from few thousand to a million rows and employ dictionary encoding only within each row group. Hence, the same column value can have different surrogate values in different row groups. So, while reading the data, conversion from surrogate value to actual value needs to be done immediately after the data is read from the disk. But CarbonData employs global surrogate key which means that a common dictionary is maintained for the full store on one machine/node. So CarbonData can perform all the query processing work such as grouping/aggregation, sorting etc on light weight surrogate values. The conversion from surrogate to actual values needs to be done only on the final result. This procedure improves performance on two aspects. Conversion from surrogate values to actual values is done only for the final result rows which are much less than the actual rows read from the store. All query processing and computation such as grouping/aggregation, sorting, and so on is done on lightweight surrogate values which requires less memory and CPU time compared to actual values.</p>
 </blockquote>
-<p>Apache CarbonData使用多个级别的索引来实现更快的搜索和查询处理。</p>
-<blockquote>
-<p>Using indexes, we can efficiently find the position of the data that is  required while skipping the parts of data that are not required (need not be processed) and hence results in faster query processing.</p>
-</blockquote>
-<p>使用索引，我们能更有效的找到数据的位置，因为我们能跳过我们不需要的数据，因此会加速查询操作。</p>
-<blockquote>
-<p>Storing data along with index significantly accelerates query performance and reduces the I/O scans and CPU resources in case of filters in the query. CarbonData index consists of multiple levels of indices, a processing framework can leverage this index to reduce the number of tasks it needs to schedule and process. It can also do skip scan in more fine grained units (called blocklet) in task side scanning instead of scanning the whole file.</p>
-</blockquote>
-<p>存储数据的时候使用索引，能够明显的提高查询性能，减少I/O扫描和CPU资源，因为在查询的时候，很多数据会被过滤。CarbonData的索引由多级索引组成，处理框架可以利用这个索引去减少很多需要调度和处理的任务。它也可以从一侧开始更细粒度的去扫描blocklet，而不是扫描整个文件。</p>
-<p>To get data using indexing, the steps followed are :</p>
-<ul>
-<li>File Pruning. 文件修剪</li>
-<li>Blocklet Pruning. Blocklet修剪</li>
-<li>Binary search using Inverted Index. 使用倒序索引进行二分查找</li>
+<p>大多数的数据库和大数据存储都是采用存储一个小的整数(integer numbers(替代值))去替代一个完整的字符串值，来达到数据的压缩。然而，几乎所有现有的数据库和数据存储将数据分成包含从几千到一百万行的行组，并且仅在每个行组内使用字典编码。因此，相同的列值可以在不同的行组中具有不同的代理值。因此，在读取数据时，在从磁盘读取数据后，需要立即从代理值到实际值的转换。 但是CarbonData使用全局替代值，这意味着在一个机器/节点上完整存储并维护了一个通用字典。 所以CarbonData可以执行所有的查询处理工作，如分组/聚合，排序等轻量级替代值。 从替代值到实际值的转换只能在最终结果上完成。 该过程在两个方面提高了性能。从替代值到真实值得转化只是在最终的结果行上完成比直接从存储中读取真实值要快很多。所有查询处理和计算，如分组/聚合，排序等都是在轻量级替代值上完成的，与实际值相比，需要更少的内存和CPU时间。</p>
+<h1 id="ENCODING-TECHNIQUE-编码技术"><a href="#ENCODING-TECHNIQUE-编码技术" class="headerlink" title="ENCODING TECHNIQUE 编码技术"></a>ENCODING TECHNIQUE 编码技术</h1><h2 id="Original-Data-原始数据"><a href="#Original-Data-原始数据" class="headerlink" title="Original Data 原始数据"></a>Original Data 原始数据</h2><div align="center"><br> <img src="https://lh3.googleusercontent.com/2u3uVdaUii8Z0pzkxViXAeBuyByvn4yV-hL5O1NIlRIj8vBl569VVn9wuLvYo5ICCoKSZAPxEluJI4DyioKsUpdBsjBYu6-eFbiaE6FZXKBqmiqypeM0JBExRYNM8G9U531AI3eA" width="800" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+
+<h2 id="Dictionary-Generation-字典生成"><a href="#Dictionary-Generation-字典生成" class="headerlink" title="Dictionary Generation 字典生成"></a>Dictionary Generation 字典生成</h2><p>All the Multi Dimensional Keys(MDK)* are compressed to some lightweight(surrogate) values, which results in less memory usage. This encoding is used to achieve data compression by storing small integer numbers (surrogate values) instead of full string values. All nulls have a default value 0, Others are assigned values accordingly.</p>
+<p>所有的Multi Dimensional Keys(MDK) 被压缩为一些轻量级的替代值，结果会减少内存的用。这种编码方式是通过存储更小的数值(替代值)来代替完整的字符串值来达到压缩数据的目的。所有的null值有一个默认的值0，其他的值也会被相应的分配替代值。</p>
+<div align="center"><br> <img src="https://lh3.googleusercontent.com/ssRao26snirAMtGJFFYJ7a7O7KLvBCJxiK5EPG6EosKZlAUtuHUxTJUC4JE4JJFq-l5hYZViWb4eFWfbwkwvuiEJYFWcc2Qw7Z3cWsBoFYoowxoe5CCcdXT44NOMFNdN0Nx_z9vu" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
+
+<p>All query processing and computation such as grouping/aggregation, sorting, and so on is done on lightweight surrogate values which requires less memory and CPU time compared to actual values.</p>
+<p>所有查询处理和计算，如分组/聚合，排序等都是在轻量级替代值上完成的，与实际值相比，需要更少的内存和CPU时间。</p>
+<h2 id="Dictionary-Encoding-字典编码"><a href="#Dictionary-Encoding-字典编码" class="headerlink" title="Dictionary Encoding 字典编码"></a>Dictionary Encoding 字典编码</h2><p>After generating the dictionary(the surrogate values for column values), the table data is updated accordingly with the new surrogate values.</p>
+<p>在字典生成之后(每个列值都生成了相应的替代值)，表数据也会相应的被新的替代值更新。</p>
+<div align="center"><br> <img src="https://lh6.googleusercontent.com/q922bMoCmibQb_21chfktctW5qXarRQrAUwLkpwllc1PyAEW2L7Glw6hxUnRpSDYViTsjbbO9WoRWlpJLd-cUumEi5XJLcBu26b5lJ_uzdv49fN_uZPRpKB4Hma9CVviszhWsu23" width="800" height="350" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
+
+<h2 id="Sorting-on-MDK-Multi-Dimensional-Keys-依据Multi-Deimensional-Keys排序"><a href="#Sorting-on-MDK-Multi-Dimensional-Keys-依据Multi-Deimensional-Keys排序" class="headerlink" title="Sorting(on MDK : Multi Dimensional Keys) : 依据Multi Deimensional Keys排序"></a>Sorting(on MDK : Multi Dimensional Keys) : 依据Multi Deimensional Keys排序</h2><p>The multi dimensional keys are then sorted, and table data is arranged accordingly.</p>
+<p>MDK被排序了之后，表数据也相应的变化。</p>
+<div align="center"><br> <img src="https://lh5.googleusercontent.com/gouuvmdINEm59ZJyJf1ZsV9oHzCvoVO2RsVFfdh6lIb6MMGfHFKHEcU7Es7JbnJ5baJ3ro85H-8xvna4rKTvjl9XtJ-JoJsnQuPD3hpUox3BCclon3EPx7yjWCY8o1FPLtqyS_On" width="800" height="350" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
+
+<h2 id="Blocklet-Logical-View-Blocklet的逻辑视图"><a href="#Blocklet-Logical-View-Blocklet的逻辑视图" class="headerlink" title="Blocklet Logical View  Blocklet的逻辑视图"></a>Blocklet Logical View  Blocklet的逻辑视图</h2><div align="center"><br> <img src="https://lh5.googleusercontent.com/s_GNQCobcsyD5tAs37SCzJEI-3Xn_TCtKAzzG3o_9Tt2GcWTLQHBpFE_o-hkTj5sjGeFE_13_8QcC18kkFAxL6mD_XFnfF8X9AumT71hUhncl1eJQjOf9SkPC0Bj4fdfoNjm6rEh" width="800" height="350" alt="图4" align="center"><br></div><br><div align="center"><br> 图五<br></div>
+
+<p>Conversion from surrogate values to actual values is done only for the final result rows which are much less than the actual rows read from the store.</p>
+<p>从替代值到真实值得转化只是在最终的结果行上完成比直接从存储中读取真实值要快很多。</p>
+<p>*(MDK)Multi Dimensional Keys are the columns which represent dimensions(the keys to analyse data) of the table(ex: Location, Months etc)</p>
+<p>(MDK)Multi Dimesional Keys 表示了表格的这些维度(分析数据的关键点)的列(例如：位置，月份等)。</p>
+<h1 id="原文地址"><a href="#原文地址" class="headerlink" title="原文地址"></a>原文地址</h1><ul>
+<li><a href="https://cwiki.apache.org/confluence/display/CARBONDATA/Dictionary+Encoding" title="Dictionary Encoding - CarbonData - Apache Software Foundation" target="_blank" rel="external">Dictionary Encoding - CarbonData - Apache Software Foundation</a></li>
 </ul>
-<h1 id="TYPES-OF-INDEXES"><a href="#TYPES-OF-INDEXES" class="headerlink" title="TYPES OF INDEXES"></a>TYPES OF INDEXES</h1><h2 id="Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing"><a href="#Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing" class="headerlink" title="Index stored in file footer(enables two level of B+ tree indexing):"></a>Index stored in file footer(enables two level of B+ tree indexing):</h2><p>索引存储在file footer(两种级别的B+树索引)</p>
-<ul>
-<li>Table level index: global B+ tree, efficient file level filtering.Searching for the file, using the table level index.These files will be further used, to get the row-groups(Data Blocks) using the file level index.</li>
-</ul>
-<p>表级别的索引：全局的B+树，高效的文件级别过滤。在文件中检索，使用表级别的索引。这些文件将会别进一步利用，使用文件级索引去得到row-groups(Data Blocks)。</p>
-<div align="center"><br> <img src="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU" width="800" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
 
-<ul>
-<li>File level index: local B+ tree,  efficient blocklet level filtering</li>
-</ul>
-<p>文件级别的索引，本地的B+树，高效的blocklet级别过滤。</p>
-<div align="center"><br> <img src="https://lh3.googleusercontent.com/sUh-7DFdi3kXFhEwWfLfw2K4NM5EdQklscpejsCI5-Oovc5xvgtKUR-HwDKMUP0qQz38ueLc9OqKgLbRebWi7Q3hWT8eXm-qmfB-qIThAB8Thg1_1QP1IL05flACYlpKczCTTcuK" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<p>Global Multi Dimensional Keys(MDK) based B+Tree Index for all non- measure columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
-<p>依据B+Tree索引的全局的Multi Dimensional Keys(MDK)帮助为测量的列去快速定位包含搜索/过滤条件匹配的数据的row groups（Data Blocks）。</p>
-<div align="center"><br> <img src="https://lh4.googleusercontent.com/vfAcqPor6uTSVswber5_7v6aWqHFPU34gtEU8WcE7m1XwJRMGiGyxajqXwk_yveOK6EDIagIBy39f6yR0N9AxwDQLAaFvqU1WTSLuvneTxOmkSRNdjoz7t2bdNmtk8TKoOf4CvB8" width="800" height="600" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<p>Min-Max Index for all columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
-<p>Min-Max索引帮助所有列去快速定位到包含搜索/过滤条件匹配的数据的row group(Data Blocks)</p>
-<div align="center"><br> <img src="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb" width="800" height="600" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
-
-<h2 id="Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描"><a href="#Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描" class="headerlink" title="Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描"></a>Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描</h2><div align="center"><br> <img src="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv" width="800" height="300" alt="图5" align="center"><br></div><br><div align="center"><br> 图五<br></div>
-
-<p>Data Block level Inverted Index for all columns aids in quickly locating the rows that contain the data matching search/filter criteria within a row group(Data Blocks).</p>
-<div align="center"><br> <img src="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN" width="800" height="300" alt="图6" align="center"><br></div><br><div align="center"><br> 图六<br></div>
       
     </div>
     
@@ -483,8 +469,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/08/21/carbon_data_file_strcture/" rel="next" title="Carbon Data 文件结构">
-                <i class="fa fa-chevron-left"></i> Carbon Data 文件结构
+              <a href="/2017/08/22/carbon_data_index/" rel="next" title="Carbon Data 多级索引">
+                <i class="fa fa-chevron-left"></i> Carbon Data 多级索引
               </a>
             
           </div>
@@ -492,10 +478,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/08/23/carbon_data_dictionary_encoding/" rel="prev" title="Carbon Data 字典编码">
-                Carbon Data 字典编码 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -642,7 +624,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#INTRODUCTION-介绍"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION 介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DESCRIPTION-描述"><span class="nav-number">2.</span> <span class="nav-text">DESCRIPTION 描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TYPES-OF-INDEXES"><span class="nav-number">3.</span> <span class="nav-text">TYPES OF INDEXES</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing"><span class="nav-number">3.1.</span> <span class="nav-text">Index stored in file footer(enables two level of B+ tree indexing):</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描"><span class="nav-number">3.2.</span> <span class="nav-text">Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#INTRODUCTION-介绍"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION 介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DESCRIPTION-描述"><span class="nav-number">2.</span> <span class="nav-text">DESCRIPTION 描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ENCODING-TECHNIQUE-编码技术"><span class="nav-number">3.</span> <span class="nav-text">ENCODING TECHNIQUE 编码技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Original-Data-原始数据"><span class="nav-number">3.1.</span> <span class="nav-text">Original Data 原始数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dictionary-Generation-字典生成"><span class="nav-number">3.2.</span> <span class="nav-text">Dictionary Generation 字典生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dictionary-Encoding-字典编码"><span class="nav-number">3.3.</span> <span class="nav-text">Dictionary Encoding 字典编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sorting-on-MDK-Multi-Dimensional-Keys-依据Multi-Deimensional-Keys排序"><span class="nav-number">3.4.</span> <span class="nav-text">Sorting(on MDK : Multi Dimensional Keys) : 依据Multi Deimensional Keys排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Blocklet-Logical-View-Blocklet的逻辑视图"><span class="nav-number">3.5.</span> <span class="nav-text">Blocklet Logical View  Blocklet的逻辑视图</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原文地址"><span class="nav-number">4.</span> <span class="nav-text">原文地址</span></a></li></ol></div>
             
 
           </div>
