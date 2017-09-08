@@ -112,18 +112,18 @@
 
 
 
-<meta name="description" content="背景在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。 解决思路查看tomcat日志因为tomcat启动失败，所以首先查看tomcat打印出来的相关日志。 1tail -n 500 &amp;#123;TOMCAT_HOME&amp;#125;/logs/">
+<meta name="description" content="背景在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。">
 <meta name="keywords" content="maven">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Maven依赖冲突解决">
 <meta property="og:url" content="http://yoursite.com/2017/08/08/maven_conflict/index.html">
 <meta property="og:site_name" content="Han 博客">
-<meta property="og:description" content="背景在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。 解决思路查看tomcat日志因为tomcat启动失败，所以首先查看tomcat打印出来的相关日志。 1tail -n 500 &amp;#123;TOMCAT_HOME&amp;#125;/logs/">
+<meta property="og:description" content="背景在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-08-08T12:34:39.916Z">
+<meta property="og:updated_time" content="2017-09-08T09:41:03.936Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Maven依赖冲突解决">
-<meta name="twitter:description" content="背景在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。 解决思路查看tomcat日志因为tomcat启动失败，所以首先查看tomcat打印出来的相关日志。 1tail -n 500 &amp;#123;TOMCAT_HOME&amp;#125;/logs/">
+<meta name="twitter:description" content="背景在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。">
 
 
 
@@ -401,6 +401,7 @@
 
       
         <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。</p>
+<a id="more"></a>
 <h1 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h1><h2 id="查看tomcat日志"><a href="#查看tomcat日志" class="headerlink" title="查看tomcat日志"></a>查看tomcat日志</h2><p>因为tomcat启动失败，所以首先查看tomcat打印出来的相关日志。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tail -n 500 &#123;TOMCAT_HOME&#125;/logs/catalina.2017-08-08.log</div></pre></td></tr></table></figure>
 <p>里面确实有错误日志，其中这个错误日志引起的我的注意。</p>
@@ -418,6 +419,12 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">     <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></div><div class="line">             <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></div><div class="line">                 <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">                 <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-logging<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">             <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></div><div class="line">     <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
 <p>再重新启动tomcat，成功。</p>
 <h1 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h1><p>在执行mvn的命令，如update，install之前，必须要先clean一下，否则可能会有之前的依赖还保留在里面。</p>
+<p>预发布地址<br>172.17.54.104<br>idata-ras-api.jcloud.com</p>
+<p>测试用例</p>
+<p>1.创建资源<br>curl -k -X POST <a href="http://localhost:8080/k8s-api/ras/kubernetes/create/testUser" target="_blank" rel="external">http://localhost:8080/k8s-api/ras/kubernetes/create/testUser</a> -d “resourceTypeId=2&amp;useTime=1&amp;containerCount=3&amp;useType=日&amp;description=cal”</p>
+<p>2.删除资源<br>curl -k –get <a href="http://localhost:8080/k8s-api/ras/kubernetes/delete/testUser" target="_blank" rel="external">http://localhost:8080/k8s-api/ras/kubernetes/delete/testUser</a> –data “id=7”</p>
+<p>3.修改资源<br>curl -k -X POST <a href="http://localhost:8080/k8s-api/ras/kubernetes/update/testUser" target="_blank" rel="external">http://localhost:8080/k8s-api/ras/kubernetes/update/testUser</a> –data “id=8&amp;containerCount=1&amp;resourceTypeId=2”</p>
+<p>4.查看资源 需要resource的id就从这里拿， 把namespaceName和thriftServerNodePort给隐藏了<br>curl -k –get <a href="http://localhost:8080/k8s-api/ras/kubernetes/get" target="_blank" rel="external">http://localhost:8080/k8s-api/ras/kubernetes/get</a> –data “userName=testUsser&amp;resourceName=my1”</p>
 
       
     </div>

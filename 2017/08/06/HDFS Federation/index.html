@@ -123,7 +123,7 @@
 <meta property="og:image" content="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif">
 <meta property="og:image" content="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation.gif">
 <meta property="og:image" content="http://dongxicheng.org/wp-content/uploads/2011/12/client-side-mount-table.jpg">
-<meta property="og:updated_time" content="2017-08-07T13:29:02.828Z">
+<meta property="og:updated_time" content="2017-09-08T09:40:44.678Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HDFS Federation">
 <meta name="twitter:description" content="背景  图一   Namespace 管理目录，文件和数据块。它支持常见的文件系统操作，如创建文件，修改文件，删除文件等。 Block Storage 由两部分组成：Block Management维护集群中datanode的基本关系，它支持数据块相关的操作，如：创建数据块，删除数据块等，同时，它也会管理副本的复制和存放。Physical Storage存储实际的数据块并提供针对数据块的读写服务。">
@@ -411,6 +411,7 @@
 <li><strong>Block Storage</strong> 由两部分组成：<strong>Block Management</strong>维护集群中datanode的基本关系，它支持数据块相关的操作，如：创建数据块，删除数据块等，同时，它也会管理副本的复制和存放。<strong>Physical Storage</strong>存储实际的数据块并提供针对数据块的读写服务。</li>
 </ul>
 <p>以前的HDFS架构只允许一个集群拥有一个命名空间，一个Namenode管理着整个命名空间。HDFS Federation通过向HDFS增加多Namenode和namespace来解决这种限制。</p>
+<a id="more"></a>
 <h1 id="HDFS-Federation"><a href="#HDFS-Federation" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h1><blockquote>
 <p>HDFS Federation是Hadoop最新发布版本Hadoop-0.23.0中为解决HDFS单点故障而提出的namenode水平扩展方案。该方案允许HDFS创建多个namespace以提高集群的扩展性和隔离性。本篇文章主要介绍了HDFS Federation的设计动机和基本原理。</p>
 </blockquote>

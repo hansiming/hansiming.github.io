@@ -126,7 +126,7 @@
 <meta property="og:image" content="http://img.blog.csdn.net/20160529195802001">
 <meta property="og:image" content="http://img.blog.csdn.net/20160529200024759">
 <meta property="og:image" content="http://img.blog.csdn.net/20160529200337300">
-<meta property="og:updated_time" content="2017-08-10T02:17:36.608Z">
+<meta property="og:updated_time" content="2017-09-08T09:40:55.844Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HDFS内存存储原理（Lazy Persist）">
 <meta name="twitter:description" content="介绍  图一  HDFS支持由Data Node管理的写入到堆栈内存的功能。Data Node会异步的将数据从内存持久化至磁盘，从而在性能敏感的IO Path中移去昂贵的磁盘IO和校验，因此我们称之为Lazy Persist。HDFS尽可能的保证在Lazy Persist策略下的持久性。在副本还未持久化至磁盘，节点重启了，则有可能会发生罕见的数据遗失。我们可以选择Lazy Persist Writ">
@@ -410,6 +410,7 @@
         <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/images/LazyPersistWrites.png" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
 
 <p>HDFS支持由Data Node管理的写入到堆栈内存的功能。Data Node会异步的将数据从内存持久化至磁盘，从而在性能敏感的IO Path中移去昂贵的磁盘IO和校验，因此我们称之为Lazy Persist。HDFS尽可能的保证在Lazy Persist策略下的持久性。在副本还未持久化至磁盘，节点重启了，则有可能会发生罕见的数据遗失。我们可以选择Lazy Persist Writes的策略来减少延迟，但可能会损失一定的持久性。</p>
+<a id="more"></a>
 <p>上文描述的原理在图一的表示其实是<strong>4,6</strong>的步骤.写数据的RAM,然后异步的写到Disk.前面几个步骤是如何设置StorageType的操作,这个在下文种会具体提到.所以上图所示的大体步骤可以归纳为如下:</p>
 <ol>
 <li>对目标文件目录设置StoragePolicy为LAZY_PERSIST的内存存储策略.</li>

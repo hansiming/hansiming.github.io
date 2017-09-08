@@ -403,8 +403,7 @@
 
       
         
-          
-            <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
+          <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
 <p>Encoded data for reduced storage space and faster processing.</p>
 </blockquote>
 <p>编码数据可以减少存储空间，加快处理的速度。</p>
@@ -412,33 +411,13 @@
 <p>Most databases and big data SQL data stores employ columnar encoding to achieve data compression by storing small integer numbers (surrogate values) instead of full string values. However, almost all existing databases and data stores divide the data into row groups containing anywhere from few thousand to a million rows and employ dictionary encoding only within each row group. Hence, the same column value can have different surrogate values in different row groups. So, while reading the data, conversion from surrogate value to actual value needs to be done immediately after the data is read from the disk. But CarbonData employs global surrogate key which means that a common dictionary is maintained for the full store on one machine/node. So CarbonData can perform all the query processing work such as grouping/aggregation, sorting etc on light weight surrogate values. The conversion from surrogate to actual values needs to be done only on the final result. This procedure improves performance on two aspects. Conversion from surrogate values to actual values is done only for the final result rows which are much less than the actual rows read from the store. All query processing and computation such as grouping/aggregation, sorting, and so on is done on lightweight surrogate values which requires less memory and CPU time compared to actual values.</p>
 </blockquote>
 <p>大多数的数据库和大数据存储都是采用存储一个小的整数(integer numbers(替代值))去替代一个完整的字符串值，来达到数据的压缩。然而，几乎所有现有的数据库和数据存储将数据分成包含从几千到一百万行的行组，并且仅在每个行组内使用字典编码。因此，相同的列值可以在不同的行组中具有不同的代理值。因此，在读取数据时，在从磁盘读取数据后，需要立即从代理值到实际值的转换。 但是CarbonData使用全局替代值，这意味着在一个机器/节点上完整存储并维护了一个通用字典。 所以CarbonData可以执行所有的查询处理工作，如分组/聚合，排序等轻量级替代值。 从替代值到实际值的转换只能在最终结果上完成。 该过程在两个方面提高了性能。从替代值到真实值得转化只是在最终的结果行上完成比直接从存储中读取真实值要快很多。所有查询处理和计算，如分组/聚合，排序等都是在轻量级替代值上完成的，与实际值相比，需要更少的内存和CPU时间。</p>
-<h1 id="ENCODING-TECHNIQUE-编码技术"><a href="#ENCODING-TECHNIQUE-编码技术" class="headerlink" title="ENCODING TECHNIQUE 编码技术"></a>ENCODING TECHNIQUE 编码技术</h1><h2 id="Original-Data-原始数据"><a href="#Original-Data-原始数据" class="headerlink" title="Original Data 原始数据"></a>Original Data 原始数据</h2><div align="center"><br> <img src="https://lh3.googleusercontent.com/2u3uVdaUii8Z0pzkxViXAeBuyByvn4yV-hL5O1NIlRIj8vBl569VVn9wuLvYo5ICCoKSZAPxEluJI4DyioKsUpdBsjBYu6-eFbiaE6FZXKBqmiqypeM0JBExRYNM8G9U531AI3eA" width="800" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
-
-<h2 id="Dictionary-Generation-字典生成"><a href="#Dictionary-Generation-字典生成" class="headerlink" title="Dictionary Generation 字典生成"></a>Dictionary Generation 字典生成</h2><p>All the Multi Dimensional Keys(MDK)* are compressed to some lightweight(surrogate) values, which results in less memory usage. This encoding is used to achieve data compression by storing small integer numbers (surrogate values) instead of full string values. All nulls have a default value 0, Others are assigned values accordingly.</p>
-<p>所有的Multi Dimensional Keys(MDK) 被压缩为一些轻量级的替代值，结果会减少内存的用。这种编码方式是通过存储更小的数值(替代值)来代替完整的字符串值来达到压缩数据的目的。所有的null值有一个默认的值0，其他的值也会被相应的分配替代值。</p>
-<div align="center"><br> <img src="https://lh3.googleusercontent.com/ssRao26snirAMtGJFFYJ7a7O7KLvBCJxiK5EPG6EosKZlAUtuHUxTJUC4JE4JJFq-l5hYZViWb4eFWfbwkwvuiEJYFWcc2Qw7Z3cWsBoFYoowxoe5CCcdXT44NOMFNdN0Nx_z9vu" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<p>All query processing and computation such as grouping/aggregation, sorting, and so on is done on lightweight surrogate values which requires less memory and CPU time compared to actual values.</p>
-<p>所有查询处理和计算，如分组/聚合，排序等都是在轻量级替代值上完成的，与实际值相比，需要更少的内存和CPU时间。</p>
-<h2 id="Dictionary-Encoding-字典编码"><a href="#Dictionary-Encoding-字典编码" class="headerlink" title="Dictionary Encoding 字典编码"></a>Dictionary Encoding 字典编码</h2><p>After generating the dictionary(the surrogate values for column values), the table data is updated accordingly with the new surrogate values.</p>
-<p>在字典生成之后(每个列值都生成了相应的替代值)，表数据也会相应的被新的替代值更新。</p>
-<div align="center"><br> <img src="https://lh6.googleusercontent.com/q922bMoCmibQb_21chfktctW5qXarRQrAUwLkpwllc1PyAEW2L7Glw6hxUnRpSDYViTsjbbO9WoRWlpJLd-cUumEi5XJLcBu26b5lJ_uzdv49fN_uZPRpKB4Hma9CVviszhWsu23" width="800" height="350" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<h2 id="Sorting-on-MDK-Multi-Dimensional-Keys-依据Multi-Deimensional-Keys排序"><a href="#Sorting-on-MDK-Multi-Dimensional-Keys-依据Multi-Deimensional-Keys排序" class="headerlink" title="Sorting(on MDK : Multi Dimensional Keys) : 依据Multi Deimensional Keys排序"></a>Sorting(on MDK : Multi Dimensional Keys) : 依据Multi Deimensional Keys排序</h2><p>The multi dimensional keys are then sorted, and table data is arranged accordingly.</p>
-<p>MDK被排序了之后，表数据也相应的变化。</p>
-<div align="center"><br> <img src="https://lh5.googleusercontent.com/gouuvmdINEm59ZJyJf1ZsV9oHzCvoVO2RsVFfdh6lIb6MMGfHFKHEcU7Es7JbnJ5baJ3ro85H-8xvna4rKTvjl9XtJ-JoJsnQuPD3hpUox3BCclon3EPx7yjWCY8o1FPLtqyS_On" width="800" height="350" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
-
-<h2 id="Blocklet-Logical-View-Blocklet的逻辑视图"><a href="#Blocklet-Logical-View-Blocklet的逻辑视图" class="headerlink" title="Blocklet Logical View  Blocklet的逻辑视图"></a>Blocklet Logical View  Blocklet的逻辑视图</h2><div align="center"><br> <img src="https://lh5.googleusercontent.com/s_GNQCobcsyD5tAs37SCzJEI-3Xn_TCtKAzzG3o_9Tt2GcWTLQHBpFE_o-hkTj5sjGeFE_13_8QcC18kkFAxL6mD_XFnfF8X9AumT71hUhncl1eJQjOf9SkPC0Bj4fdfoNjm6rEh" width="800" height="350" alt="图4" align="center"><br></div><br><div align="center"><br> 图五<br></div>
-
-<p>Conversion from surrogate values to actual values is done only for the final result rows which are much less than the actual rows read from the store.</p>
-<p>从替代值到真实值得转化只是在最终的结果行上完成比直接从存储中读取真实值要快很多。</p>
-<p>*(MDK)Multi Dimensional Keys are the columns which represent dimensions(the keys to analyse data) of the table(ex: Location, Months etc)</p>
-<p>(MDK)Multi Dimesional Keys 表示了表格的这些维度(分析数据的关键点)的列(例如：位置，月份等)。</p>
-<h1 id="原文地址"><a href="#原文地址" class="headerlink" title="原文地址"></a>原文地址</h1><ul>
-<li><a href="https://cwiki.apache.org/confluence/display/CARBONDATA/Dictionary+Encoding" title="Dictionary Encoding - CarbonData - Apache Software Foundation" target="_blank" rel="external">Dictionary Encoding - CarbonData - Apache Software Foundation</a></li>
-</ul>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/23/carbon_data_dictionary_encoding/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -577,8 +556,7 @@
 
       
         
-          
-            <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
+          <h1 id="INTRODUCTION-介绍"><a href="#INTRODUCTION-介绍" class="headerlink" title="INTRODUCTION 介绍"></a>INTRODUCTION 介绍</h1><blockquote>
 <p>Apache CarbonData has Rich Multi-Level Index Support.</p>
 </blockquote>
 <p>Apache CarbonData有丰富的多级索引支持。</p>
@@ -590,42 +568,13 @@
 <p>Using indexes, we can efficiently find the position of the data that is  required while skipping the parts of data that are not required (need not be processed) and hence results in faster query processing.</p>
 </blockquote>
 <p>使用索引，我们能更有效的找到数据的位置，因为我们能跳过我们不需要的数据，因此会加速查询操作。</p>
-<blockquote>
-<p>Storing data along with index significantly accelerates query performance and reduces the I/O scans and CPU resources in case of filters in the query. CarbonData index consists of multiple levels of indices, a processing framework can leverage this index to reduce the number of tasks it needs to schedule and process. It can also do skip scan in more fine grained units (called blocklet) in task side scanning instead of scanning the whole file.</p>
-</blockquote>
-<p>存储数据的时候使用索引，能够明显的提高查询性能，减少I/O扫描和CPU资源，因为在查询的时候，很多数据会被过滤。CarbonData的索引由多级索引组成，处理框架可以利用这个索引去减少很多需要调度和处理的任务。它也可以从一侧开始更细粒度的去扫描blocklet，而不是扫描整个文件。</p>
-<p>To get data using indexing, the steps followed are :</p>
-<ul>
-<li>File Pruning. 文件修剪</li>
-<li>Blocklet Pruning. Blocklet修剪</li>
-<li>Binary search using Inverted Index. 使用倒序索引进行二分查找</li>
-</ul>
-<h1 id="TYPES-OF-INDEXES"><a href="#TYPES-OF-INDEXES" class="headerlink" title="TYPES OF INDEXES"></a>TYPES OF INDEXES</h1><h2 id="Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing"><a href="#Index-stored-in-file-footer-enables-two-level-of-B-tree-indexing" class="headerlink" title="Index stored in file footer(enables two level of B+ tree indexing):"></a>Index stored in file footer(enables two level of B+ tree indexing):</h2><p>索引存储在file footer(两种级别的B+树索引)</p>
-<ul>
-<li>Table level index: global B+ tree, efficient file level filtering.Searching for the file, using the table level index.These files will be further used, to get the row-groups(Data Blocks) using the file level index.</li>
-</ul>
-<p>表级别的索引：全局的B+树，高效的文件级别过滤。在文件中检索，使用表级别的索引。这些文件将会别进一步利用，使用文件级索引去得到row-groups(Data Blocks)。</p>
-<div align="center"><br> <img src="https://lh3.googleusercontent.com/AUYtv4KCU6mudTNCCunhWfAt79qXTqFmS5d3i-WFCePVmJb4qkCfBfvjqwM0gupQjNOUZ650shHEexbHI_5hLxObQ8If01FEv85RNNUhXI90luRc8wJZizwigqHADxjpRqHXBcRU" width="800" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
-
-<ul>
-<li>File level index: local B+ tree,  efficient blocklet level filtering</li>
-</ul>
-<p>文件级别的索引，本地的B+树，高效的blocklet级别过滤。</p>
-<div align="center"><br> <img src="https://lh3.googleusercontent.com/sUh-7DFdi3kXFhEwWfLfw2K4NM5EdQklscpejsCI5-Oovc5xvgtKUR-HwDKMUP0qQz38ueLc9OqKgLbRebWi7Q3hWT8eXm-qmfB-qIThAB8Thg1_1QP1IL05flACYlpKczCTTcuK" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<p>Global Multi Dimensional Keys(MDK) based B+Tree Index for all non- measure columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
-<p>依据B+Tree索引的全局的Multi Dimensional Keys(MDK)帮助为测量的列去快速定位包含搜索/过滤条件匹配的数据的row groups（Data Blocks）。</p>
-<div align="center"><br> <img src="https://lh4.googleusercontent.com/vfAcqPor6uTSVswber5_7v6aWqHFPU34gtEU8WcE7m1XwJRMGiGyxajqXwk_yveOK6EDIagIBy39f6yR0N9AxwDQLAaFvqU1WTSLuvneTxOmkSRNdjoz7t2bdNmtk8TKoOf4CvB8" width="800" height="600" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<p>Min-Max Index for all columns aids in quickly locating the row groups(Data Blocks) that contain the data matching search/filter criteria.</p>
-<p>Min-Max索引帮助所有列去快速定位到包含搜索/过滤条件匹配的数据的row group(Data Blocks)</p>
-<div align="center"><br> <img src="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb" width="800" height="600" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
-
-<h2 id="Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描"><a href="#Column-level-index-inverted-index-used-for-efficient-column-chunk-scan-列级别的索引：倒序索引，用于高效的列块扫描" class="headerlink" title="Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描"></a>Column level index: inverted index used for efficient column chunk scan 列级别的索引：倒序索引，用于高效的列块扫描</h2><div align="center"><br> <img src="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv" width="800" height="300" alt="图5" align="center"><br></div><br><div align="center"><br> 图五<br></div>
-
-<p>Data Block level Inverted Index for all columns aids in quickly locating the rows that contain the data matching search/filter criteria within a row group(Data Blocks).</p>
-<div align="center"><br> <img src="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN" width="800" height="300" alt="图6" align="center"><br></div><br><div align="center"><br> 图六<br></div>
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/22/carbon_data_index/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -764,8 +713,7 @@
 
       
         
-          
-            <h1 id="Carbon-Data-Structure"><a href="#Carbon-Data-Structure" class="headerlink" title="Carbon Data Structure"></a>Carbon Data Structure</h1><blockquote>
+          <h1 id="Carbon-Data-Structure"><a href="#Carbon-Data-Structure" class="headerlink" title="Carbon Data Structure"></a>Carbon Data Structure</h1><blockquote>
 <p>Apache CarbonData file contains groups of data called blocklet, along with all required information like schema, offsets and indices, etc, in a file footer.</p>
 </blockquote>
 <p>Apache CarbonData 文件包含一组称为blocklet的数据组，在文件的尾部，存储着所有的必要信息，包括Schema，offset，indices等等</p>
@@ -777,38 +725,13 @@
 <p>Each blocklet in the file is further divided into chunks of data called Data Chunks. Each data chunk is organised either in a columnar format or a row format, and stores the data of either in a single column or a set of columns. All blocklets in one file contain the same number and type of Data Chunks.</p>
 </blockquote>
 <p>在文件中的每个blocklet在后续会被划分成称为Data Chunks的数据组。每个data chunk都可以被用列格式或者行格式所组织(???)，在data chunk中存储了一列或者多个列。在一个文件中的所有blocklet都包含了相同数目和类型的data chunks。</p>
-<div align="center"><br> <img src="https://lh5.googleusercontent.com/iRA2X9m4ex6tjaOfjnXgMHtnFghOc3NTPom2zUQ0TG4rSUw-IHDg5iHTPixKbbSGWx13kre4NBfUpwGRfX4z-csW2tGm_ykQyNhEeJ58_TvS-TiVADVZyds-P3w6YewvY4N5iCNh" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
-
-<div align="center"><br> <img src="https://lh6.googleusercontent.com/-sOUDQecvT2NXNSEsWcL_JCtuZxt9F7BXxLzeAxNUoMxmmx8PoEfkYou8Re50zYHkKl5eWnk3BXgJKDs7NIEhZBUzFWjrFMZ58-B1diHfs6jDdzKSuySCMoRAVfvHegcsTBeaE8Q" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<h2 id="Block"><a href="#Block" class="headerlink" title="Block"></a>Block</h2><blockquote>
-<p> It would be as same as HDFS block, CarbonData creates one file for each data block, user can specify TABLE_BLOCKSIZE during creation table. Each file contains File Header, Blocklets and File Footer.</p>
-</blockquote>
-<p>类似于HDFS的block，Carbondata为每一个data block创建了一个文件，用户在创建table的时候可以指定TABLE_BLOCKSIZE的大小。每一个文件包含了FileHeader，Blocklets和File Footer。</p>
-<div align="center"><br> <img src="/images/carbondata1.png" width="800" height="350" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<h2 id="File-Header"><a href="#File-Header" class="headerlink" title="File Header"></a>File Header</h2><blockquote>
-<p>It contains CarbonData file version number, list of column schema and schema updation timestamp.</p>
-</blockquote>
-<p>File Header包含了file version number，每一列Schema的列表，Schema更新的时间。</p>
-<h2 id="File-Footer"><a href="#File-Footer" class="headerlink" title="File Footer"></a>File Footer</h2><blockquote>
-<p>it contains Number of rows, segmentinfo ,all blocklets? info and index, you can find the detail from the below diagram.</p>
-</blockquote>
-<p>File Footer包含了行的个数，段的信息，所有的blocklets的信息和索引。</p>
-<h2 id="Blocklet"><a href="#Blocklet" class="headerlink" title="Blocklet"></a>Blocklet</h2><blockquote>
-<p>Rows are grouped to form a blocklet, the size of the blocklet is configurable and default size is 64MB, Blocklet contains Column Page groups for each column.</p>
-</blockquote>
-<p>Blocklet是很多行数据的集合，他的大小是可以配置的，默认大小是64M，Blocklet包含了每列的Column Page Groups。</p>
-<h3 id="Column-Page-Group"><a href="#Column-Page-Group" class="headerlink" title="Column Page Group"></a>Column Page Group</h3><blockquote>
-<p>Data of one column and it is further divided into pages, it is guaranteed to be contiguous in file.</p>
-</blockquote>
-<p>一列的数据，进而会被分配进Page里面，它不需保证在一个文件里面是连续的。</p>
-<h3 id="Page"><a href="#Page" class="headerlink" title="Page"></a>Page</h3><blockquote>
-<p>It has the data of one column and the number of row is fixed to 32000 size.</p>
-</blockquote>
-<p>Page里面有一列的数据，行数限制为32000。</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/21/carbon_data_file_strcture/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -947,113 +870,14 @@
 
       
         
-          
-            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。</p>
-<h1 id="创建Pair-RDD"><a href="#创建Pair-RDD" class="headerlink" title="创建Pair RDD"></a>创建Pair RDD</h1><p>在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可以调用map函数来实现，传递的函数需要返回键值对。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val arr = sc.parallelize(List(1, 2, 3, 3))</div><div class="line">arr: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val pairs = arr.map(x =&gt; (x, x + 1))</div><div class="line">pairs: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[1] at map at &lt;console&gt;:26</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">pairs.foreach(x =&gt; (println(x._1 + &quot; &quot; + x._2)))</div><div class="line">2 3</div><div class="line">3 4</div><div class="line">1 2</div><div class="line">3 4</div></pre></td></tr></table></figure>
-<h1 id="Pair-RDD的转化操作"><a href="#Pair-RDD的转化操作" class="headerlink" title="Pair RDD的转化操作"></a>Pair RDD的转化操作</h1><p>由于pair RDD中包含二元组，所以需要传递函数应当操作二元组而不是独立的元素，假设键值对集合为{(1,2),(3,4),(3,6)}</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val pairs = sc.parallelize(List((1, 2), (3, 4), (3,6)))</div><div class="line">pairs: org.apache.spark.rdd.RDD[(Int, Int)] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
-<ul>
-<li>reduceByKey(func) 合并具有相同key的value值</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.reduceByKey((x,y)=&gt;x+y)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = ShuffledRDD[14] at reduceByKey at &lt;console&gt;:29  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(1,2)  </div><div class="line">(3,10)</div></pre></td></tr></table></figure>
-<ul>
-<li>groupByKey() 对具有相同键的进行分组 [数据分组]</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.groupByKey()</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Iterable[Int])] = ShuffledRDD[1] at groupByKey at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,CompactBuffer(4, 6))</div><div class="line">(1,CompactBuffer(2))</div></pre></td></tr></table></figure>
-<ul>
-<li>mapValues(func) 对pairRDD中的每个值应用func 键不改变</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.mapValues(x =&gt; x + 1)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[2] at mapValues at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,5)</div><div class="line">(1,3)</div><div class="line">(3,7)</div></pre></td></tr></table></figure>
-<ul>
-<li>flatMapValues(func) 类似于mapValues，返回的是迭代器函数</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.flatMapValues(x =&gt; x to 5)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[3] at flatMapValues at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,4)</div><div class="line">(3,5)</div><div class="line">(1,2)</div><div class="line">(1,3)</div><div class="line">(1,4)</div><div class="line">(1,5)</div></pre></td></tr></table></figure>
-<ul>
-<li>keys 返回一个仅包含键的RDD，该方法不应该有括号</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.keys</div><div class="line">result: org.apache.spark.rdd.RDD[Int] = MapPartitionsRDD[4] at keys at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">1</div><div class="line">3</div><div class="line">3</div></pre></td></tr></table></figure>
-<ul>
-<li>values 返回一个仅包含value的RDD，该方法不应该有括号</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.values</div><div class="line">result: org.apache.spark.rdd.RDD[Int] = MapPartitionsRDD[5] at values at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">4</div><div class="line">6</div><div class="line">2</div></pre></td></tr></table></figure>
-<ul>
-<li>sortByKey() 返回一个根据键排序的RDD</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = pairs.sortByKey()</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = ShuffledRDD[8] at sortByKey at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,4)</div><div class="line">(3,6)</div><div class="line">(1,2)</div></pre></td></tr></table></figure>
-<p>针对两个pair RDD 的转化操作  假设：rdd={(1,2),(3,4),(3,6)} other={(3,9)}</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">scala&gt; val rdd = sc.parallelize(List((1, 2), (3, 4), (3,6)))</div><div class="line">rdd: org.apache.spark.rdd.RDD[(Int, Int)] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div><div class="line"></div><div class="line">scala&gt; val other = sc.parallelize(List((3, 9)))</div><div class="line">other: org.apache.spark.rdd.RDD[(Int, Int)] = ParallelCollectionRDD[1] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
-<ul>
-<li>subtractByKey( other ) 删除掉RDD中与other RDD中键相同的元素</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.subtractByKey(other)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, Int)] = SubtractedRDD[2] at subtractByKey at &lt;console&gt;:28</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(1,2)</div></pre></td></tr></table></figure>
-<ul>
-<li>join( other ) 对两个RDD进行内连接</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.join(other)</div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Int, Int))] = MapPartitionsRDD[5] at join at &lt;console&gt;:28</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(3,(4,9))</div><div class="line">(3,(6,9))</div></pre></td></tr></table></figure>
-<ul>
-<li>rightOuterJoin(other) 对两个RDD进行连接操作，确保第二个RDD的键必须存在（右外连接）</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.rightOuterJoin(other)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Option[Int], Int))] = MapPartitionsRDD[15] at rightOuterJoin at &lt;console&gt;:31  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(3,(Some(4),9))  </div><div class="line">(3,(Some(6),9))</div></pre></td></tr></table></figure>
-<ul>
-<li>leftOuterJoin(other) 对两个RDD进行连接操作，确保第一个RDD的键必须存在（左外连接）</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.leftOuterJoin(other)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Int, Option[Int]))] = MapPartitionsRDD[18] at leftOuterJoin at &lt;console&gt;:31  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(3,(4,Some(9)))  </div><div class="line">(3,(6,Some(9)))  </div><div class="line">(1,(2,None))</div></pre></td></tr></table></figure>
-<ul>
-<li>cogroup(other) 将有两个rdd中拥有相同键的数据分组</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; val result = rdd.cogroup(other)  </div><div class="line">result: org.apache.spark.rdd.RDD[(Int, (Iterable[Int], Iterable[Int]))] = MapPartitionsRDD[20] at cogroup at &lt;console&gt;:31  </div><div class="line">  </div><div class="line">scala&gt; result.foreach(println)  </div><div class="line">(1,(CompactBuffer(2),CompactBuffer()))  </div><div class="line">(3,(CompactBuffer(4, 6),CompactBuffer(9)))</div></pre></td></tr></table></figure>
-<h2 id="聚合操作"><a href="#聚合操作" class="headerlink" title="聚合操作"></a>聚合操作</h2><p>当数据以键值对形式组织的时候，聚合具有相同键的元素进行一些统计是很常见的一些操作。</p>
-<h3 id="reduceByKey"><a href="#reduceByKey" class="headerlink" title="reduceByKey()"></a>reduceByKey()</h3><p>与reduce()相当类似，它们都接收一个函数，并使用该函数对进行合并。下面是使用reduceByKey()和mapValues()来计算每个键的对应值的平均值的例子。</p>
-<div align="center"><br> <img src="/images/spark_pair_rdd_1.jpg" width="800" height="350" alt="图一" align="center"><br></div><br><div align="center"><br> 图一<br></div>
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">scala&gt; val rdd = sc.parallelize(List((&quot;panda&quot;, 0), (&quot;pink&quot;, 3), (&quot;pirate&quot;, 3), (&quot;panda&quot;, 1), (&quot;pink&quot;, 4)))</div><div class="line">rdd: org.apache.spark.rdd.RDD[(String, Int)] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div><div class="line"></div><div class="line">scala&gt; val result = rdd.mapValues(x =&gt; (x, 1)).reduceByKey((x, y) =&gt; (x._1 + y._1, x._2 + x._2))</div><div class="line">result: org.apache.spark.rdd.RDD[(String, (Int, Int))] = ShuffledRDD[2] at reduceByKey at &lt;console&gt;:26</div><div class="line"></div><div class="line">scala&gt; result.foreach(println)</div><div class="line">(pirate,(3,1))</div><div class="line">(panda,(1,2))</div><div class="line">(pink,(7,2))</div></pre></td></tr></table></figure>
-<h3 id="combineByKey"><a href="#combineByKey" class="headerlink" title="combineByKey()"></a>combineByKey()</h3><div align="center"><br> <img src="/images/spark_pair_rdd_2.png" width="800" height="350" alt="图二" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<p>如图二所示，如果这是一个新的元素， combineByKey() 会使用一个叫作 createCombiner() 的函数来创建那个键对应的累加器的初始值。 如果这是一个在处理当前分区之前已经遇到的键， 它会使用mergeValue() 方法将该键的累加器对应的当前值与这个新的值进行合并。由于每个分区都是独立处理的， 因此对于同一个键可以有多个累加器。如果有两个或者更多的分区都有对应同一个键的累加器， 就需要使用用户提供的 mergeCombiners() 方法将各个分区的结果进行合并。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> result = rdd.combineByKey(</div><div class="line">    (v) =&gt; (v, <span class="number">1</span>),</div><div class="line">    (acc: (<span class="type">Int</span>, <span class="type">Int</span>), v) =&gt; (acc._1 + v, acc._2 + <span class="number">1</span>),</div><div class="line">    (acc1: (<span class="type">Int</span>, <span class="type">Int</span>), acc2: (<span class="type">Int</span>, <span class="type">Int</span>)) =&gt; (acc1._1 + acc2._1, acc1._2 + acc2._2))</div><div class="line">    .map&#123;</div><div class="line">      <span class="keyword">case</span> (key, value) =&gt; (key, value._1 / value._2.toFloat)</div><div class="line">    &#125;</div><div class="line">  result.collectAsMap().map(println(_))</div></pre></td></tr></table></figure>
-<h2 id="并行度"><a href="#并行度" class="headerlink" title="并行度"></a>并行度</h2><p>每个 RDD 都有固定数目的分区，分区数决定了在 RDD 上执行操作时的并行度。在执行聚合或分组操作时， 可以要求 Spark 使用给定的分区数。上面讨论的大多数操作符都能接收第二个参数， 这个参数用来指定分组结果或聚合结果的RDD 的分区数。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//使用默认并行度</span></div><div class="line">rdd.reduceByKey((x, y) =&gt; y + <span class="number">1</span>)</div><div class="line"><span class="comment">//设置并行度为10</span></div><div class="line">rdd.reduceByKey((x, y) =&gt; y + <span class="number">1</span>, <span class="number">10</span>)</div></pre></td></tr></table></figure>
-<h2 id="数据分组"><a href="#数据分组" class="headerlink" title="数据分组"></a>数据分组</h2><ul>
-<li>groupByKey() 对于一个由类型 K 的键和类型 V 的值组成的 RDD，所得到的结果 RDD 类型会是[K, Iterable[V]]。</li>
-</ul>
-<blockquote>
-<p>如果程序中先使用了groupByKey() 然后再使用了 reduce() 或者fold() 的代码，很可能可以通过使用一种根据键进行聚合的函数来更高效地实现同样的效果。例如， rdd.reduceByKey(func)与 rdd.groupByKey().mapValues(value =value.reduce(func)) 等价，但是前者更为高效，因为它避免了为每个键创建存放值的列表的步骤。</p>
-</blockquote>
-<ul>
-<li>groupBy() 可以用于未成对的数据上，也可以根据除键相同以外的条件进行分组。它可以接收一个函数，对源 RDD 中的每个元素使用该函数，将返回结果作为键再进行分组。</li>
-<li>cogroup() 对多个共享同一个键的 RDD 进行分组。两个键的类型均为 K 而值的类型分别为 V 和 W 的 RDD 进行cogroup() 时，得到的结果 RDD 类型为 [(K, (Iterable[V], Iterable[W]))]。注意后面这个方括号中的是两个迭代对象。</li>
-</ul>
-<h2 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h2><ul>
-<li><p>join 只有在两个 pair RDD 中都存在的键才叫输出。</p>
-</li>
-<li><p>leftOuterJoin 源 RDD 的每一个键都有对应的记录。每个键相应的值是由一个源 RDD 中的值与一个包含第二个 RDD 的值的 Option（在 Java 中为Optional）对象组成的二元组。在 Python 中，如果一个值不存在，则使用 None 来表示；而数据存在时就用常规的值来表示， 不使用任何封装。</p>
-</li>
-<li>rightOuterJoin 只不过预期结果中的键必须出现在第二个 RDD 中，而二元组中的可缺失的部分则来自于源 RDD 而非第二个 RDD。</li>
-</ul>
-<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><ul>
-<li>sortByKey 接收一个叫作 ascending 的参数，表示我们是否想要让结果按升序排序，下面是一个例子</li>
-</ul>
-<h1 id="Pair-RDD的行动操作"><a href="#Pair-RDD的行动操作" class="headerlink" title="Pair RDD的行动操作"></a>Pair RDD的行动操作</h1><div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-98844d200b521443.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图三" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<h1 id="数据分区"><a href="#数据分区" class="headerlink" title="数据分区"></a>数据分区</h1><p>Spark 程序可以通过控制RDD 分区方式来减少通信开销。 分区并不是对所有应用都有好处的——比如，如果给定RDD 只需要被扫描一次， 我们完全没有必要对其预先进行分区处理。只有当数据集多次在诸如连接这种基于键的操作中使用时， 分区才会有帮助。</p>
-<p>Spark 中所有的键值对 RDD 都可以进行分区。系统会根据一个针对键的函数对元素进行分组。Spark 没有给出显示控制每个键具体落在哪一个工作节点上的方法（部分原因是Spark 即使在某些节点失败时依然可以工作），但 Spark 可以确保同一组的键出现在同一个节点上。</p>
-<p>一个例子：内存中保存着一张很大的用户信息表——一个由 (UserID, UserInfo) 对组成的 RDD，其中 UserInfo 包含一个该用户所订阅的主题的列表。 该应用会周期性地将这张表与一个小文件进行组合，这个小文件中存着过去五分钟内发生的事件——其实就是一个由 (UserID, LinkInfo) 对组成的表，存放着过去五分钟内某网站各用户的访问情况。我们需要对用户访问其未订阅主题的页面的情况进行统计。下面首先是未分区的Scala程序例子：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 初始化代码；从HDFS商的一个Hadoop SequenceFile中读取用户信息</span></div><div class="line"><span class="comment">// userData中的元素会根据它们被读取时的来源，即HDFS块所在的节点来分布</span></div><div class="line"><span class="comment">// Spark此时无法获知某个特定的UserID对应的记录位于哪个节点上</span></div><div class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(...)</div><div class="line"><span class="keyword">val</span> userData = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">UserInfo</span>](<span class="string">"hdfs://..."</span>).persist()</div><div class="line"><span class="comment">// 周期性调用函数来处理过去五分钟产生的事件日志</span></div><div class="line"><span class="comment">// 假设这是一个包含(UserID, LinkInfo)对的SequenceFile</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">processNewLogs</span></span>(logFileName: <span class="type">String</span>) &#123;</div><div class="line"><span class="keyword">val</span> events = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">LinkInfo</span>](logFileName)</div><div class="line"><span class="keyword">val</span> joined = userData.join(events)<span class="comment">// RDD of (UserID, (UserInfo, LinkInfo)) pairs</span></div><div class="line"><span class="keyword">val</span> offTopicVisits = joined.filter &#123;</div><div class="line">  <span class="keyword">case</span> (userId, (userInfo, linkInfo)) =&gt; <span class="comment">// Expand the tuple into its components</span></div><div class="line">    !userInfo.topics.contains(linkInfo.topic)</div><div class="line">&#125;.count()</div><div class="line">  println(<span class="string">"Number of visits to non-subscribed topics: "</span> + offTopicVisits)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>对上面的代码，每次调用 processNewLogs() 时都会用到 join() 操作，而我们对数据集是如何分区的却一无所知。接操作会将两个数据集中的所有键的哈希值都求出来， 将该哈希值相同的记录通过网络传到同一台机器上，然后在那台机器上对所有键相同的记录进行连接操作。因为 userData 表比每五分钟出现的访问日志表 events 要大得多，所以要浪费时间做很多额外工作：在每次调用时都对 userData 表进行哈希值计算和跨节点数据混洗，虽然这些数据从来都不会变化。其网络通信图如下所示：</p>
-<div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-227dfccabba70350.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图四" align="center"><br></div><br><div align="center"><br> 图四<br></div>
-
-<p>更改上面的代码</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//这里创建了自定义分区</span></div><div class="line"><span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(...)</div><div class="line"><span class="keyword">val</span> userData = sc.sequenceFile[<span class="type">UserID</span>, <span class="type">UserInfo</span>](<span class="string">"hdfs://..."</span>)</div><div class="line">  .partitionBy(<span class="keyword">new</span> <span class="type">HashPartitioner</span>(<span class="number">100</span>)) <span class="comment">// 构造100个分区</span></div><div class="line">  .persist()</div><div class="line"><span class="comment">//python是这样使用的： rdd.partitionBy(100)</span></div></pre></td></tr></table></figure>
-<p>在 processNewLogs() 中， eventsRDD 是 本 地 变量，只在该方法中使用了一次， 所以为 events 指定分区方式没有什么用处。由于在构建 userData 时调用了 partitionBy()， Spark 就知道了该 RDD 是根据键的哈希值来分区的，这样在调用 join() 时， Spark 就会利用到这一点。具体来说，当调用 userData.join(events) 时， Spark 只会对 events 进行数据混洗操作，将 events 中特定 UserID 的记录发送到 userData 的对应分区所在的那台机器上）。这样，需要通过网络传输的数据就大大减少了，程序运行速度可以显著提升了。这种方式的额网络通信图如下所示。注意上面需要将partitionBy的结果持久化，不进行持久化会导致整个 RDD 谱系图重新求值。那样的话， partitionBy() 带来的好处就会被抵消，导致重复对数据进行分区以及跨节点的混洗，和没有指定分区方式时发生的情况十分相似。</p>
-<div align="center"><br> <img src="http://upload-images.jianshu.io/upload_images/5593513-3de9ca6517698707.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" width="800" height="350" alt="图五" align="center"><br></div><br><div align="center"><br> 图五<br></div>
-
-<h2 id="影响分区方式的操作"><a href="#影响分区方式的操作" class="headerlink" title="影响分区方式的操作"></a>影响分区方式的操作</h2><p>会为生成的结果 RDD 设好分区方式的操作：<code>cogroup()、 groupWith()、join()、 lef tOuterJoin()、 rightOuterJoin()、 groupByKey()、reduceByKey()、combineByKey()、 partitionBy()、 sort()、 mapValues()（如果父 RDD 有分区方式的话）、flatMapValues()</code>对于二元操作，输出数据的分区方式取决于父 RDD 的分区方式。默认情况下，结果会采用哈希分区， 分区的数量和操作的并行度一样。不过，如果其中的一个父 RDD 已经设置过分区方式， 那么结果就会采用那种分区方式；如果两个父 RDD 都设置过分区方式，结果 RDD 会采用第一个父 RDD 的分区方式。</p>
-<h2 id="自定义分区"><a href="#自定义分区" class="headerlink" title="自定义分区"></a>自定义分区</h2><p>Spark内部提供了HashPartitioner和RangePartitioner两种分区策略(这两种分区的代码解析可以参见：《Spark分区器HashPartitioner和RangePartitioner代码详解》)，这两种分区策略在很多情况下都适合我们的场景。但是有些情况下，Spark内部不能符合咱们的需求，这时候我们就可以自定义分区策略。为此，Spark提供了相应的接口，我们只需要扩展Partitioner抽象类。</p>
-
-          
+          <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/15/spark_pair_rdd/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1192,164 +1016,18 @@
 
       
         
-          
-            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>RDD(Resilient Distributed Dataset)是一种不可变的分布式对象集合，每个RDD都被分为多个分区，这些分区都运行在集群的不同节点上。主要包含了两种操作</p>
+          <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>RDD(Resilient Distributed Dataset)是一种不可变的分布式对象集合，每个RDD都被分为多个分区，这些分区都运行在集群的不同节点上。主要包含了两种操作</p>
 <ul>
 <li>转化操作(transformations):从一个存在的RDD中创建一个新的RDD，比如map(),filter()。</li>
 <li>行动操作(actions):向驱动器程序返回结果或把结果写入到外部系统的操作，会触发实际的计算，比如count()和first()。</li>
 </ul>
-<h1 id="创建RDD"><a href="#创建RDD" class="headerlink" title="创建RDD"></a>创建RDD</h1><p>创建RDD主要包含如下两种方法</p>
-<ul>
-<li>读取外部数据</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">createRddFromExternalFile</span></span>(appName: <span class="type">String</span>, textFilePath: <span class="type">String</span>) = &#123;</div><div class="line"></div><div class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(appName))</div><div class="line">  sc.textFile(textFilePath)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li>把一个已有的集合传给SparkContext的parallelize()方法</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">createRddByExistDataSet</span></span>(appName: <span class="type">String</span>) = &#123;</div><div class="line"></div><div class="line">  <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(<span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(appName))</div><div class="line">  sc.parallelize(<span class="type">List</span>(<span class="string">"tank"</span>, <span class="string">"tanks"</span>))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h1 id="转化操作-transformations"><a href="#转化操作-transformations" class="headerlink" title="转化操作(transformations)"></a>转化操作(transformations)</h1><p>RDD的转化操作是返回新RDD的操作</p>
-<p>对一个数据{1，2，3，3}的RDD进行基本的RDD转化操作</p>
-<ul>
-<li>map() 将函数应用于RDD中的每个元素，将返回新的RDD</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.map(x =&gt; x+<span class="number">1</span>)</div><div class="line"><span class="comment">//返回&#123;2, 3, 4, 4&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>flatMap() 将函数应用于RDD中的每个元素，将返回的迭代器的所有元素构成的RDD。通常用于切分单词</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.map(x =&gt; x.to(<span class="number">3</span>))</div><div class="line"><span class="comment">//返回&#123;1，2，3，2，3，3，3&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>filter() 返回一个由通过传给filter()的函数的元素组成的RDD</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.filter( x =&gt; x != <span class="number">1</span> )</div><div class="line"><span class="comment">//返回 &#123;2，3，3&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>distinct() 去重</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.distinct()</div><div class="line"><span class="comment">//返回 &#123;1, 2, 3&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>sample(withRepalcement,fraction,[seed]) 对RDD采样 ，以及是否替换。withRepalcement 是否为放回（不重复），fraction 为数量。</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.sample(<span class="literal">false</span>, <span class="number">0.5</span>)</div><div class="line"><span class="comment">//返回 不确定的</span></div></pre></td></tr></table></figure>
-<p>对数据分别为rdd -&gt; {1，2，3}和other -&gt; {3，4，5} 的RDD 进行针对两个RDD的转化操作</p>
-<ul>
-<li>union() 生成 一个包含两个RDD 中所有元素的RDD </li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.union(other)</div><div class="line"><span class="comment">//返回 &#123;1，2，3，3，4，5&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>intersection() 求两个RDD共同的元素</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.intersection(other)</div><div class="line"><span class="comment">//返回 &#123;3&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>substract() 移除一个RDD中的内容（例如移除训练数据）</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.substract(other)</div><div class="line"><span class="comment">//返回 &#123;1,2&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>cartesian() 与另一个RDD的笛卡尔积</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.cartesian(other)</div><div class="line"><span class="comment">//返回 &#123;（1，3），（1，4），...&#125;</span></div></pre></td></tr></table></figure>
-<h1 id="行动操作-actions"><a href="#行动操作-actions" class="headerlink" title="行动操作(actions)"></a>行动操作(actions)</h1><p>把最终求得的结果返回到驱动器程序，或者写入外部存储系统</p>
-<p>对一个数据{1，2，3，3}的RDD进行基本的RDD行动操作</p>
-<ul>
-<li>collect() 返回RDD中的所有元素</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.collect()</div><div class="line"><span class="comment">//返回 &#123;1，2，3，3&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>count() RDD 中的元素个数  </li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.count()</div><div class="line"><span class="comment">//返回 4</span></div></pre></td></tr></table></figure>
-<ul>
-<li>countByValue() 各结果在RDD中出现的次数</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.countByValue()</div><div class="line"><span class="comment">//返回 &#123;（1，1），（2，1），（3，2）&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>take(num) 从RDD中返回num个元素</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.take(<span class="number">2</span>)</div><div class="line"><span class="comment">//返回 &#123;1，2&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li>top(num) 从RDD中返回前面的num个元素</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.top(<span class="number">2</span>)</div><div class="line"><span class="comment">//返回 &#123;3，3&#125;</span></div></pre></td></tr></table></figure>
-<ul>
-<li><p>takeOrdered(num)(ordering) 从RDD中按照提供的顺序返回最前面的num个匀速</p>
-</li>
-<li><p>takeSample(withReplacement,num,[seed]) 从RDD中返回任意一些元素</p>
-</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.takeSample(<span class="literal">false</span>, <span class="number">2</span>)</div><div class="line"><span class="comment">//返回 不确定的</span></div></pre></td></tr></table></figure>
-<ul>
-<li>reduce(func) 并行整合RDD中的所有数据 </li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.reduce((x,y) =&gt; x+y)</div><div class="line"><span class="comment">//返回 9</span></div></pre></td></tr></table></figure>
-<ul>
-<li>fold(zero)(func) 和reduce 一样，但是需要提供初始值</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.fold(<span class="number">0</span>)((x,y) =&gt; x+y)</div><div class="line"><span class="comment">//返回 9</span></div></pre></td></tr></table></figure>
-<ul>
-<li>aggregate(zeroValue)(seq0p,comb0p) 和reduce 类似但是通常返回不同的数据</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//第一个函数的作用是把RDD中的元素合并起来放入累加器</span></div><div class="line"><span class="comment">//第二个函数的作用是：考虑到每个节点是在本地进行累加的，最后还需要提供一个函数将两个累加器进行两两和合并</span></div><div class="line">rdd.aggregate((<span class="number">0</span>,<span class="number">0</span>))((x,y) =&gt; (x._1 + y,x._2 +<span class="number">1</span> ),(x,y) =&gt; (x._1 + y._1, x._2 + y._2)) </div><div class="line"><span class="comment">//返回 (9, 4)</span></div></pre></td></tr></table></figure>
-<ul>
-<li>foreach(func) 对RDD 中的每个元素使用给定的函数 </li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">rdd.foreach(func)</div><div class="line"><span class="comment">//返回 不确定的</span></div></pre></td></tr></table></figure>
-<h1 id="惰性求值"><a href="#惰性求值" class="headerlink" title="惰性求值"></a>惰性求值</h1><p>惰性求值意味着当我们对RDD调用转化操作(例如调用map())时，操作不会立即执行。相反，Spark会在内部记录下所要求执行的操作的相关信息。我们不应该把RDD看做存放着待定数据的数据集，而最好把每个RDD当作我们通过转化操作构建出来的，记录如何计算数据的指令列表。把数据读取到RDD的操作也同样是惰性的。因此，当我们调用sc.textFile()时，数据并没有读取进来，而是在必要时才会读取。和转化操作一样得失，读取数据的操作也有可能会多次执行。</p>
-<h1 id="持久化-缓存"><a href="#持久化-缓存" class="headerlink" title="持久化(缓存)"></a>持久化(缓存)</h1><p>RDD是惰性求值的，而有时我们希望能多次使用同一个RDD，为了避免多次计算同一个RDD，可以让Spark对数据进行<strong>持久化</strong>。</p>
-<p>Spark最重要的一个功能是它可以通过各种操作（operations）持久化（或者缓存）一个集合到内存中。当你持久化一个RDD的时候，每一个节点都将参与计算的所有分区数据存储到内存中，并且这些 数据可以被这个集合（以及这个集合衍生的其他集合）的动作（action）重复利用。这个能力使后续的动作速度更快（通常快10倍以上）。对应迭代算法和快速的交互使用来说，缓存是一个关键的工具。</p>
-<p>你能通过<code>persist()</code>或者<code>cache()</code>方法持久化一个rdd。首先，在action中计算得到rdd；然后，将其保存在每个节点的内存中。Spark的缓存是一个容错的技术，如果RDD的任何一个分区丢失，它 可以通过原有的转换（transformations）操作自动的重复计算并且创建出这个分区。</p>
-<p>此外，我们可以利用不同的存储级别存储每一个被持久化的RDD。例如，它允许我们持久化集合到磁盘上、将集合作为序列化的Java对象持久化到内存中、在节点间复制集合或者存储集合到 Tachyon中。我们可以通过传递一个<code>StorageLevel</code>对象给<code>persist()</code>方法设置这些存储级别。<code>cache()</code>方法使用了默认的存储级别<code>StorageLevel.MEMORY_ONLY</code>。完整的存储级别介绍如下所示：</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:left">Storage Level</th>
-<th style="text-align:left">Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left">MEMORY_ONLY</td>
-<td style="text-align:left">将RDD作为非序列化的Java对象存储在jvm中。如果RDD不适合存在内存中，一些分区将不会被缓存，从而在每次需要这些分区时都需重新计算它们。这是系统默认的存储级别。</td>
-</tr>
-<tr>
-<td style="text-align:left">MEMORY_AND_DISK</td>
-<td style="text-align:left">将RDD作为非序列化的Java对象存储在jvm中。如果RDD不适合存在内存中，将这些不适合存在内存中的分区存储在磁盘中，每次需要时读出它们。</td>
-</tr>
-<tr>
-<td style="text-align:left">MEMORY_ONLY_SER</td>
-<td style="text-align:left">将RDD作为序列化的Java对象存储（每个分区一个byte数组）。这种方式比非序列化方式更节省空间，特别是用到快速的序列化工具时，但是会更耗费cpu资源—密集的读操作。</td>
-</tr>
-<tr>
-<td style="text-align:left">MEMORY_AND_DISK_SER</td>
-<td style="text-align:left">和MEMORY_ONLY_SER类似，但不是在每次需要时重复计算这些不适合存储到内存中的分区，而是将这些分区存储到磁盘中。</td>
-</tr>
-<tr>
-<td style="text-align:left">DISK_ONLY</td>
-<td style="text-align:left">仅仅将RDD分区存储到磁盘中</td>
-</tr>
-<tr>
-<td style="text-align:left">MEMORY_ONLY_2, MEMORY_AND_DISK_2, etc.</td>
-<td style="text-align:left">和上面的存储级别类似，但是复制每个分区到集群的两个节点上面</td>
-</tr>
-<tr>
-<td style="text-align:left">OFF_HEAP (experimental)</td>
-<td style="text-align:left">以序列化的格式存储RDD到Tachyon中。相对于MEMORY_ONLY_SER，OFF_HEAP减少了垃圾回收的花费，允许更小的执行者共享内存池。这使其在拥有大量内存的环境下或者多并发应用程序的环境中具有更强的吸引力。</td>
-</tr>
-</tbody>
-</table>
-<h2 id="如何选择存储级别"><a href="#如何选择存储级别" class="headerlink" title="如何选择存储级别"></a>如何选择存储级别</h2><p>Spark的多个存储级别意味着在内存利用率和cpu利用效率间的不同权衡。我们推荐通过下面的过程选择一个合适的存储级别：</p>
-<ul>
-<li>如果你的RDD适合默认的存储级别（MEMORY_ONLY），就选择默认的存储级别。因为这是cpu利用率最高的选项，会使RDD上的操作尽可能的快。</li>
-<li>如果不适合用默认的级别，选择MEMORY_ONLY_SER。选择一个更快的序列化库提高对象的空间使用率，但是仍能够相当快的访问。</li>
-<li>除非函数计算RDD的花费较大或者它们需要过滤大量的数据，不要将RDD存储到磁盘上，否则，重复计算一个分区就会和重磁盘上读取数据一样慢。</li>
-<li>如果你希望更快的错误恢复，可以利用重复(replicated)存储级别。所有的存储级别都可以通过重复计算丢失的数据来支持完整的容错，但是重复的数据能够使你在RDD上继续运行任务，而不需要重复计算丢失的数据。</li>
-<li>在拥有大量内存的环境中或者多应用程序的环境中，OFF_HEAP具有如下优势：<ul>
-<li>它运行多个执行者共享Tachyon中相同的内存池</li>
-<li>它显著地减少垃圾回收的花费</li>
-<li>如果单个的执行者崩溃，缓存的数据不会丢失</li>
-</ul>
-</li>
-</ul>
-<h2 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h2><p>Spark自动的监控每个节点缓存的使用情况，利用最近最少使用原则删除老旧的数据。如果你想手动的删除RDD，可以使用<code>RDD.unpersist()</code>方法</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/13/spark_rdd_program/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1488,49 +1166,14 @@
 
       
         
-          
-            <h1 id="在Intellij-IDEA中构建Spark项目"><a href="#在Intellij-IDEA中构建Spark项目" class="headerlink" title="在Intellij IDEA中构建Spark项目"></a>在Intellij IDEA中构建Spark项目</h1><h2 id="新建一个Maven项目"><a href="#新建一个Maven项目" class="headerlink" title="新建一个Maven项目"></a>新建一个Maven项目</h2><ul>
-<li>pom.xml</li>
-</ul>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">   <span class="tag">&lt;<span class="name">properties</span>&gt;</span></div><div class="line">       <span class="comment">&lt;!-- maven jdk version --&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">maven.compiler.source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">maven.compiler.source</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">maven.compiler.target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">maven.compiler.target</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">encoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">encoding</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">scala.tools.version</span>&gt;</span>2.10<span class="tag">&lt;/<span class="name">scala.tools.version</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">scala.version</span>&gt;</span>2.11.8<span class="tag">&lt;/<span class="name">scala.version</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></div><div class="line"></div><div class="line">   <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.scala-lang<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>scala-library<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;scala.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"></div><div class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.spark<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spark-core_2.10<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.2.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line"></div><div class="line">       <span class="comment">&lt;!-- Test --&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.11<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.specs2<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>specs2_$&#123;scala.tools.version&#125;<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.13<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.scalatest<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>scalatest_$&#123;scala.tools.version&#125;<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.M6-SNAP8<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></div><div class="line"></div><div class="line">   <span class="tag">&lt;<span class="name">build</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">pluginManagement</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></div><div class="line">               <span class="comment">&lt;!-- 编译Scala插件 --&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.alchim31.maven<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>scala-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">               <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div><div class="line">               <span class="comment">&lt;!-- 编译Java插件 --&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">               <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div><div class="line">           <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">pluginManagement</span>&gt;</span></div><div class="line">       <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.alchim31.maven<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>scala-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">executions</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">id</span>&gt;</span>scala-compile-first<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">phase</span>&gt;</span>process-resources<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">                           <span class="tag">&lt;<span class="name">goal</span>&gt;</span>add-source<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">                           <span class="tag">&lt;<span class="name">goal</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">id</span>&gt;</span>scala-test-compile<span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">phase</span>&gt;</span>process-test-resources<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">                           <span class="tag">&lt;<span class="name">goal</span>&gt;</span>testCompile<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">               <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></div><div class="line">           <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div><div class="line">           <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">               <span class="tag">&lt;<span class="name">executions</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">phase</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">                           <span class="tag">&lt;<span class="name">goal</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">                       <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">                   <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">               <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></div><div class="line">           <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div><div class="line">       <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></div><div class="line">   <span class="tag">&lt;/<span class="name">build</span>&gt;</span></div><div class="line">...</div></pre></td></tr></table></figure>
-<h2 id="编写WordCount代码"><a href="#编写WordCount代码" class="headerlink" title="编写WordCount代码"></a>编写WordCount代码</h2><ul>
-<li>Java版本</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> org.apache.spark.SparkConf;</div><div class="line"><span class="keyword">import</span> org.apache.spark.api.java.JavaPairRDD;</div><div class="line"><span class="keyword">import</span> org.apache.spark.api.java.JavaRDD;</div><div class="line"><span class="keyword">import</span> org.apache.spark.api.java.JavaSparkContext;</div><div class="line"><span class="keyword">import</span> org.slf4j.Logger;</div><div class="line"><span class="keyword">import</span> scala.Tuple2;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.util.Arrays;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by hansiming on 2017/8/11.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WordCount</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line"></div><div class="line">        Logger logger = org.slf4j.LoggerFactory.getLogger(WordCount.class);</div><div class="line"></div><div class="line">        <span class="keyword">if</span>(args.length &lt; <span class="number">2</span>) &#123;</div><div class="line">            logger.error(<span class="string">"wrong parameters number, parameters should have input path and output path"</span>);</div><div class="line">            System.exit(<span class="number">1</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        String inputPath = args[<span class="number">0</span>];</div><div class="line">        String outputPath = args[<span class="number">1</span>];</div><div class="line"></div><div class="line">        logger.info(<span class="string">"input path = &#123;&#125;, output path = &#123;&#125;"</span>, inputPath, outputPath);</div><div class="line"></div><div class="line">        SparkConf conf = <span class="keyword">new</span> SparkConf().setAppName(<span class="string">"WordCountByJava"</span>);</div><div class="line">        JavaSparkContext sc = <span class="keyword">new</span> JavaSparkContext(conf);</div><div class="line">        JavaRDD&lt;String&gt; input = sc.textFile(inputPath);</div><div class="line"></div><div class="line">        JavaPairRDD&lt;String, Integer&gt; counts = input.flatMap(</div><div class="line">                s -&gt; Arrays.asList(s.split(<span class="string">" "</span>)).iterator()</div><div class="line">        ).mapToPair(</div><div class="line">                s -&gt; <span class="keyword">new</span> Tuple2&lt;&gt;(s, <span class="number">1</span>)</div><div class="line">        ).reduceByKey(</div><div class="line">                (a, b) -&gt; a + b</div><div class="line">        );</div><div class="line"></div><div class="line">        counts.saveAsTextFile(outputPath);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li>Scala版本</li>
-</ul>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> org.apache.log4j.<span class="type">Logger</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.&#123;<span class="type">SparkConf</span>, <span class="type">SparkContext</span>&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line">  * Created by hansiming on 2017/8/11.</div><div class="line">  */</div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">WordCount</span> </span>&#123;</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</div><div class="line"></div><div class="line">    <span class="comment">//Scala有两种变量，val和var。val就不能再赋值了。与之对应的，var可以在它生命周期中被多次赋值。</span></div><div class="line">    <span class="keyword">val</span> logger = <span class="type">Logger</span>.getLogger(<span class="keyword">this</span>.getClass)</div><div class="line"></div><div class="line">    <span class="keyword">if</span>(args.length &lt; <span class="number">2</span>) &#123;</div><div class="line">      logger.error(<span class="string">"wrong parameters number, parameters should have input path and output path"</span>)</div><div class="line">      <span class="type">System</span>.exit(<span class="number">1</span>)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">val</span> inputPath = args(<span class="number">0</span>)</div><div class="line">    <span class="keyword">val</span> outputPath = args(<span class="number">1</span>)</div><div class="line">    logger.info(<span class="string">"input path = &#123;&#125;, output path = &#123;&#125;"</span>, inputPath, outputPath);</div><div class="line"></div><div class="line">    <span class="keyword">val</span> jobName = <span class="string">"WordCountByScala"</span></div><div class="line"></div><div class="line">    <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(jobName)</div><div class="line">    <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">val</span> textFile = sc.textFile(inputPath)</div><div class="line"></div><div class="line">    <span class="comment">//Spark 中 map函数会对每一条输入进行指定的操作，然后为每一条输入返回一个对象；</span></div><div class="line">    <span class="comment">//而flatMap函数则是两个操作的集合——正是“先映射后扁平化”：</span></div><div class="line">    <span class="comment">//操作1：同map函数一样：对每一条输入进行指定的操作，然后为每一条输入返回一个对象</span></div><div class="line">    <span class="comment">//操作2：最后将所有对象合并为一个对象</span></div><div class="line">    <span class="keyword">val</span> counts = textFile.flatMap(line =&gt; line.split(<span class="string">" "</span>)).map(word =&gt; (word, <span class="number">1</span>)).reduceByKey(_ + _)</div><div class="line"></div><div class="line">    counts.saveAsTextFile(outputPath)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="项目文件清单"><a href="#项目文件清单" class="headerlink" title="项目文件清单"></a>项目文件清单</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">│  pom.xml</div><div class="line">│  spark-word-count-demo.iml</div><div class="line">│  </div><div class="line">└─src</div><div class="line">    ├─main</div><div class="line">    │  ├─java</div><div class="line">    │  │  └─com</div><div class="line">    │  │      └─cszjo</div><div class="line">    │  │          └─java</div><div class="line">    │  │                  WordCount.java</div><div class="line">    │  │                  </div><div class="line">    │  ├─resources</div><div class="line">    │  └─scala</div><div class="line">    │      └─com</div><div class="line">    │          └─cszjo</div><div class="line">    │              └─scala</div><div class="line">    │                      WordCount.scala</div><div class="line">    │                      </div><div class="line">    └─test</div><div class="line">        └─scala</div></pre></td></tr></table></figure>
-<h2 id="执行WordCount项目"><a href="#执行WordCount项目" class="headerlink" title="执行WordCount项目"></a>执行WordCount项目</h2><ul>
-<li>编译打包WordCount项目</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mvn clean package</div></pre></td></tr></table></figure>
-<ul>
-<li><p>打包之后的jar包，位于target下，将jar包copy到%{SPARK_HOME}/bin下，然后在该目录下放入待统计文件input.txt。</p>
-</li>
-<li><p>通过spark-submit执行打包好的jar包，Scala版本</p>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./spark-submit --class com.cszjo.scala.WordCount ./spark-word-count-demo-1.0-SNAPSHOT.jar input.txt ./output</div></pre></td></tr></table></figure>
-<ul>
-<li>执行完成之后，执行结果就在output之中，可以查看结果</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cat part-00001</div><div class="line">(changes,1)</div><div class="line">(it,1)</div><div class="line">(The,1)</div><div class="line">(non-privileged,1)</div><div class="line">(about,2)</div><div class="line">(installer-supplied,1)</div><div class="line">(on,5)</div><div class="line">(known,2)</div><div class="line">((Also,1)</div><div class="line">(validation.,1)</div><div class="line">(at,1)</div><div class="line">(in,1)</div><div class="line">(redistributable,1)</div><div class="line">(architecture,,1)</div><div class="line">(also,2)</div><div class="line">(software,2)</div><div class="line">...</div></pre></td></tr></table></figure>
-<ul>
-<li>Java版本（需要先删除生成的output文件夹）</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./spark-submit --class com.cszjo.java.WordCount ./spark-word-count-demo-1.0-SNAPSHOT.jar input.txt ./output</div></pre></td></tr></table></figure>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://spark.apache.org/examples.html" title="Examples | Apache Spark" target="_blank" rel="external">Examples | Apache Spark</a></li>
-<li><a href="http://www.infoq.com/cn/news/2011/04/xxb-maven-7-plugin" title="Maven实战（七）——常用Maven插件介绍" target="_blank" rel="external">Maven实战（七）——常用Maven插件介绍</a></li>
-</ul>
-<h1 id="源码下载（Github）"><a href="#源码下载（Github）" class="headerlink" title="源码下载（Github）"></a>源码下载（Github）</h1><ul>
-<li><a href="https://github.com/hansiming/spark-learn-demo/tree/master" title="spark-learn-demo" target="_blank" rel="external">spark-learn-demo</a></li>
-</ul>
-<p>tree -f –&gt; Windows 打印文件树形结构</p>
-
-          
+          <h1 id="在Intellij-IDEA中构建Spark项目"><a href="#在Intellij-IDEA中构建Spark项目" class="headerlink" title="在Intellij IDEA中构建Spark项目"></a>在Intellij IDEA中构建Spark项目</h1><h2 id="新建一个Maven项目"><a href="#新建一个Maven项目" class="headerlink" title="新建一个Maven项目"></a>新建一个Maven项目</h2>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/11/spark_word_count/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1669,116 +1312,16 @@
 
       
         
-          
-            <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/images/LazyPersistWrites.png" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+          <h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/images/LazyPersistWrites.png" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
 
 <p>HDFS支持由Data Node管理的写入到堆栈内存的功能。Data Node会异步的将数据从内存持久化至磁盘，从而在性能敏感的IO Path中移去昂贵的磁盘IO和校验，因此我们称之为Lazy Persist。HDFS尽可能的保证在Lazy Persist策略下的持久性。在副本还未持久化至磁盘，节点重启了，则有可能会发生罕见的数据遗失。我们可以选择Lazy Persist Writes的策略来减少延迟，但可能会损失一定的持久性。</p>
-<p>上文描述的原理在图一的表示其实是<strong>4,6</strong>的步骤.写数据的RAM,然后异步的写到Disk.前面几个步骤是如何设置StorageType的操作,这个在下文种会具体提到.所以上图所示的大体步骤可以归纳为如下:</p>
-<ol>
-<li>对目标文件目录设置StoragePolicy为LAZY_PERSIST的内存存储策略.</li>
-<li>客户端进程向NameNode发起创建/写文件的请求.</li>
-<li>请求到具体的DataNode,DataNode会把这些数据块写入RAM内存中,同时启动异步线程服务将内存数据持久化到磁盘上.</li>
-</ol>
-<p>内存的异步持久化存储,就是明显不同于其他介质存储数据的地方.这应该也是LAZY_PERSIST的名称的源由吧,数据不是马上落盘,而是”lazy persisit”懒惰的方式,延时的处理.</p>
-<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p>在之前的篇幅中已经提到过,数据存储的同时会有另外一批数据会被异步的持久化,所以这里一定会涉及到多个服务对象的合作.这些服务对象的指挥者是FsDatasetImpl.他是一个掌管DataNode所有磁盘读写数据的管家.</p>
-<p>在FsDatasetImpl中,与内存存储相关的服务对象有如下的3个.</p>
-<div align="center"><br> <img src="http://img.blog.csdn.net/20160529195437234" width="800" height="350" alt="图2" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<ul>
-<li><p><strong>LazyWriter</strong>:lazyWriter是一个线程服务,此线程会不断的循环着从数据块列表中取出数据块,加入到异步持久化线程池RamDiskAsyncLazyPersistService中去执行.</p>
-</li>
-<li><p><strong>RamDiskAsyncLazyPersistService</strong>:此对象就是异步持久化线程服务,里面针对每一个磁盘块设置一个对应的线程池,然后需要持久化到给定的磁盘块的数据块会被提交到对应的线程池中去.每个线程池的最大线程数为1.</p>
-</li>
-<li><p><strong>RamDiskReplicaLruTracker</strong>:副本块跟踪类,此类种维护了所有已持久化,未持久化的副本以及总副本数据信息.所以当一个副本被最终存储到内存种后,相应的会有副本所属队列信息的变更.其次当节点内存不足的时候,部分距离最近最久没有被访问的副本块会在此类中被移除.</p>
-</li>
-</ul>
-<h2 id="RamDiskReplicaLruTracker"><a href="#RamDiskReplicaLruTracker" class="headerlink" title="RamDiskReplicaLruTracker"></a>RamDiskReplicaLruTracker</h2><p>在以上3者中,RamDiskReplicaLruTracker的角色起到了一个中间人的角色.因为他内部维护了多个关系的数据块信息.主要的就是以下3类.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RamDiskReplicaLruTracker</span> <span class="keyword">extends</span> <span class="title">RamDiskReplicaTracker</span> </span>&#123;</div><div class="line"></div><div class="line">  ...</div><div class="line"></div><div class="line">  <span class="comment">/**</span></div><div class="line">   * &lt;block pool ID &lt;block ID, RamDiskRelicaLru&gt;</div><div class="line">   * Map of blockpool ID to &lt;map of blockID to ReplicaInfo&gt;.</div><div class="line">   */</div><div class="line">  Map&lt;String, Map&lt;Long, RamDiskReplicaLru&gt;&gt; replicaMaps;</div><div class="line"></div><div class="line">  <span class="comment">/**</span></div><div class="line">   * 将会被写入到磁盘的副本队列</div><div class="line">   * Queue of replicas that need to be written to disk.</div><div class="line">   * Stale entries are GC'd by dequeueNextReplicaToPersist.</div><div class="line">   */</div><div class="line">  Queue&lt;RamDiskReplicaLru&gt; replicasNotPersisted;</div><div class="line"></div><div class="line">  <span class="comment">/**</span></div><div class="line">   * 已经被持久化的副本，按照上次使用的时间排序</div><div class="line">   * Map of persisted replicas ordered by their last use times.</div><div class="line">   */</div><div class="line">  TreeMultimap&lt;Long, RamDiskReplicaLru&gt; replicasPersisted;</div><div class="line"></div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<div align="center"><br> <img src="http://img.blog.csdn.net/20160529195555378" width="800" height="350" alt="图3" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<p>三种数据块的关系如图三所示，replicaMaps是<block pool="" id="" <block="" id,="" ramdiskrelicalru="">的Map（关于Block pool，在上篇<a href="http://www.cszjo.com/2017/08/06/HDFS%20Federation/" target="_blank" rel="external">HDFS Federation</a>中有介绍），Ram副本都会在replicaMaps中存在。replicasNotPersisted保存的是将会写入到磁盘的队列。replicasPersisted保存的是已经被持久化的副本，并且按照上次使用的时间排序。</block></p>
-<p>列出几个RamDiskReplicaLruTracker类中关键的方法</p>
-<ul>
-<li><strong>addReplica</strong> 新添副本</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">addReplica</span><span class="params">(<span class="keyword">final</span> String bpid, <span class="keyword">final</span> <span class="keyword">long</span> blockId,</span></span></div><div class="line">                             <span class="keyword">final</span> FsVolumeImpl transientVolume) &#123;</div><div class="line">  Map&lt;Long, RamDiskReplicaLru&gt; map = replicaMaps.get(bpid);</div><div class="line">  <span class="keyword">if</span> (map == <span class="keyword">null</span>) &#123;</div><div class="line">    map = <span class="keyword">new</span> HashMap&lt;Long, RamDiskReplicaLru&gt;();</div><div class="line">    replicaMaps.put(bpid, map);</div><div class="line">  &#125;</div><div class="line">  RamDiskReplicaLru ramDiskReplicaLru = <span class="keyword">new</span> RamDiskReplicaLru(bpid, blockId, transientVolume);</div><div class="line">  map.put(blockId, ramDiskReplicaLru);</div><div class="line">  <span class="comment">//将ramDiskReplicaLru放入到replicasNotPersisted之中</span></div><div class="line">  replicasNotPersisted.add(ramDiskReplicaLru);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li><strong>dequeueNextReplicaToPersist</strong> 从replicasNotPersisted队列中拿出下一个将要被持久化的副本</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="comment">//从replicasNotPersisted中拿到下个将会被持久化的block</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> RamDiskReplicaLru <span class="title">dequeueNextReplicaToPersist</span><span class="params">()</span> </span>&#123;</div><div class="line">  <span class="keyword">while</span> (replicasNotPersisted.size() != <span class="number">0</span>) &#123;</div><div class="line">    RamDiskReplicaLru ramDiskReplicaLru = replicasNotPersisted.remove();</div><div class="line">    Map&lt;Long, RamDiskReplicaLru&gt; replicaMap =</div><div class="line">        replicaMaps.get(ramDiskReplicaLru.getBlockPoolId());</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (replicaMap != <span class="keyword">null</span> &amp;&amp; replicaMap.get(ramDiskReplicaLru.getBlockId()) != <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">return</span> ramDiskReplicaLru;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// The replica no longer exists, look for the next one.</span></div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li><strong>recordStartLazyPersist</strong> 记录开始Lazy Persist持久化操作</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">recordStartLazyPersist</span><span class="params">(</span></span></div><div class="line">    <span class="keyword">final</span> String bpid, <span class="keyword">final</span> <span class="keyword">long</span> blockId, FsVolumeImpl checkpointVolume) &#123;</div><div class="line">  Map&lt;Long, RamDiskReplicaLru&gt; map = replicaMaps.get(bpid);</div><div class="line">  RamDiskReplicaLru ramDiskReplicaLru = map.get(blockId);</div><div class="line"><span class="comment">//设置被持久化的Volume</span></div><div class="line">  ramDiskReplicaLru.setLazyPersistVolume(checkpointVolume);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li><strong>recordEndLazyPersist</strong> 记录结束Lazy Persist持久化操作</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">recordEndLazyPersist</span><span class="params">(</span></span></div><div class="line">    <span class="keyword">final</span> String bpid, <span class="keyword">final</span> <span class="keyword">long</span> blockId, <span class="keyword">final</span> File[] savedFiles) &#123;</div><div class="line">  Map&lt;Long, RamDiskReplicaLru&gt; map = replicaMaps.get(bpid);</div><div class="line">  RamDiskReplicaLru ramDiskReplicaLru = map.get(blockId);</div><div class="line"></div><div class="line">  <span class="keyword">if</span> (ramDiskReplicaLru == <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Unknown replica bpid="</span> +</div><div class="line">        bpid + <span class="string">"; blockId="</span> + blockId);</div><div class="line">  &#125;</div><div class="line">  ramDiskReplicaLru.recordSavedBlockFiles(savedFiles);</div><div class="line"></div><div class="line">  <span class="keyword">if</span> (replicasNotPersisted.peek() == ramDiskReplicaLru) &#123;</div><div class="line">    <span class="comment">// Common case.</span></div><div class="line">    replicasNotPersisted.remove();</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="comment">// Caller error? Fallback to O(n) removal.</span></div><div class="line">    replicasNotPersisted.remove(ramDiskReplicaLru);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  ramDiskReplicaLru.lastUsedTime = Time.monotonicNow();</div><div class="line">  replicasPersisted.put(ramDiskReplicaLru.lastUsedTime, ramDiskReplicaLru);</div><div class="line">  ramDiskReplicaLru.isPersisted = <span class="keyword">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li><strong>reenqueueReplicaNotPersisted</strong> 持久化失败，则将该副本重新加入replicasNotPersisted队列</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">reenqueueReplicaNotPersisted</span><span class="params">(<span class="keyword">final</span> RamDiskReplica ramDiskReplicaLru)</span> </span>&#123;</div><div class="line">  replicasNotPersisted.add((RamDiskReplicaLru) ramDiskReplicaLru);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<div align="center"><br> <img src="http://img.blog.csdn.net/20160529195802001" width="800" height="350" alt="图4" align="center"><br></div><br><div align="center"><br> 图四<br></div>
-
-<p>而这些方法大概的执行顺序如图四所示</p>
-<p>当节点重启或者有新的文件被设置了LAZY_PERSIST策略后,就会有新的副本块被存储到内存中,同时会加入到replicaNotPersisted队列中.然后经过中间的dequeueNextReplicaToPersist取出下一个将被持久化的副本块,进行写磁盘的操作.recordStartLazyPersist,recordEndLazyPersist这2个方法会在持久化的过程中被调用,标志着持久化状态的变更.</p>
-<p>还有三个方法虽然与持久化无关，但是也比较重要</p>
-<ul>
-<li><p><strong>discardReplica</strong>:当此副本已经被检测出不需要的时候,包括已被删除,或已损坏的情况,可以从内存中移除,撤销.</p>
-</li>
-<li><p><strong>touch</strong>:恰好与Linux种的touch同名,此方法意味访问了一次某特定的副本块,并会更新此副本块的lastUesdTime. lastUesdTime会在后面提到的LRU算法中起到关键的作用.</p>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//touch会更新最近访问的时间</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">touch</span><span class="params">(<span class="keyword">final</span> String bpid,</span></span></div><div class="line">                        <span class="keyword">final</span> <span class="keyword">long</span> blockId) &#123;</div><div class="line">  Map&lt;Long, RamDiskReplicaLru&gt; map = replicaMaps.get(bpid);</div><div class="line">  RamDiskReplicaLru ramDiskReplicaLru = map.get(blockId);</div><div class="line"></div><div class="line">  ...</div><div class="line"></div><div class="line">  <span class="comment">// Reinsert the replica with its new timestamp.</span></div><div class="line">  <span class="comment">// 更新最近访问时间戳,并重新插入数据</span></div><div class="line">  <span class="keyword">if</span> (replicasPersisted.remove(ramDiskReplicaLru.lastUsedTime, ramDiskReplicaLru)) &#123;</div><div class="line">    ramDiskReplicaLru.lastUsedTime = Time.monotonicNow();</div><div class="line">    replicasPersisted.put(ramDiskReplicaLru.lastUsedTime, ramDiskReplicaLru);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//第二步获取候选移除块</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> RamDiskReplicaLru <span class="title">getNextCandidateForEviction</span><span class="params">()</span> </span>&#123;</div><div class="line">  <span class="comment">// 获取replicasPersisted迭代器进行遍历</span></div><div class="line">  <span class="keyword">final</span> Iterator&lt;RamDiskReplicaLru&gt; it = replicasPersisted.values().iterator();</div><div class="line">  <span class="keyword">while</span> (it.hasNext()) &#123;</div><div class="line">    <span class="comment">// 因为replicasPersisted已经根据时间排好序了,所以取出当前的块进行移除即可</span></div><div class="line">    <span class="keyword">final</span> RamDiskReplicaLru ramDiskReplicaLru = it.next();</div><div class="line">    it.remove();</div><div class="line"></div><div class="line">    Map&lt;Long, RamDiskReplicaLru&gt; replicaMap =</div><div class="line">        replicaMaps.get(ramDiskReplicaLru.getBlockPoolId());</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (replicaMap != <span class="keyword">null</span> &amp;&amp; replicaMap.get(ramDiskReplicaLru.getBlockId()) != <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">return</span> ramDiskReplicaLru;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// The replica no longer exists, look for the next one.</span></div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li><strong>getNextCandidateForEviction</strong>:此方法在DataNode内存空间不足,需要内存额外预留出空间给新的副本块存放时被调用.此方法会根据所设置的eviction scheme模式,选择需要被移除的块,默认的是LRU策略的.</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Attempt to evict one or more transient block replicas until we</div><div class="line"> * have at least bytesNeeded bytes free.</div><div class="line"> */</div><div class="line"><span class="comment">//根据已持久化的块的访问时间来进行筛选移除,而不是直接是内存中的块</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">evictBlocks</span><span class="params">(<span class="keyword">long</span> bytesNeeded)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">  <span class="keyword">int</span> iterations = <span class="number">0</span>;</div><div class="line"></div><div class="line">  <span class="keyword">final</span> <span class="keyword">long</span> cacheCapacity = cacheManager.getCacheCapacity();</div><div class="line">  <span class="comment">// 当检测到内存空间不满足外界需要的大小时</span></div><div class="line">  <span class="keyword">while</span> (iterations++ &lt; MAX_BLOCK_EVICTIONS_PER_ITERATION &amp;&amp;</div><div class="line">         (cacheCapacity - cacheManager.getCacheUsed()) &lt; bytesNeeded) &#123;</div><div class="line">    <span class="comment">// 获取待移除副本信息</span></div><div class="line">    RamDiskReplica replicaState = ramDiskReplicaTracker.getNextCandidateForEviction();</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (replicaState == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</div><div class="line">      LOG.debug(<span class="string">"Evicting block "</span> + replicaState);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...</div><div class="line">    <span class="comment">// 移除内存中的相关块并释放空间</span></div><div class="line">      <span class="comment">// Delete the block+meta files from RAM disk and release locked</span></div><div class="line">      <span class="comment">// memory.</span></div><div class="line">      removeOldReplica(replicaInfo, newReplicaInfo, blockFile, metaFile,</div><div class="line">          blockFileUsed, metaFileUsed, bpid);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="LazyWriter"><a href="#LazyWriter" class="headerlink" title="LazyWriter"></a>LazyWriter</h2><p>LazyWriter是一个线程服务,他是一个发动机,循环不断的从队列中取出待持久化的数据块,提交到异步持久化服务中去.直接来看主要的run方法.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">  <span class="keyword">int</span> numSuccessiveFailures = <span class="number">0</span>;</div><div class="line"></div><div class="line">  <span class="keyword">while</span> (fsRunning &amp;&amp; shouldRun) &#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">      <span class="comment">// 取出新的副本块并提交到异步服务中,返回是否提交成功布尔值</span></div><div class="line">      numSuccessiveFailures = saveNextReplica() ? <span class="number">0</span> : (numSuccessiveFailures + <span class="number">1</span>);</div><div class="line"></div><div class="line">      <span class="comment">// Sleep if we have no more work to do or if it looks like we are not</span></div><div class="line">      <span class="comment">// making any forward progress. This is to ensure that if all persist</span></div><div class="line">      <span class="comment">// operations are failing we don't keep retrying them in a tight loop.</span></div><div class="line">      <span class="keyword">if</span> (numSuccessiveFailures &gt;= ramDiskReplicaTracker.numReplicasNotPersisted()) &#123;</div><div class="line">        Thread.sleep(checkpointerInterval * <span class="number">1000</span>);</div><div class="line">        numSuccessiveFailures = <span class="number">0</span>;</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">      LOG.info(<span class="string">"LazyWriter was interrupted, exiting"</span>);</div><div class="line">      <span class="keyword">break</span>;</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">      LOG.warn(<span class="string">"Ignoring exception in LazyWriter:"</span>, e);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>进入saveNextReplica方法的处理</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">saveNextReplica</span><span class="params">()</span> </span>&#123;</div><div class="line">  RamDiskReplica block = <span class="keyword">null</span>;</div><div class="line">  FsVolumeReference targetReference;</div><div class="line">  FsVolumeImpl targetVolume;</div><div class="line">  ReplicaInfo replicaInfo;</div><div class="line">  <span class="keyword">boolean</span> succeeded = <span class="keyword">false</span>;</div><div class="line"></div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">    <span class="comment">// 从队列种取出新的待持久化的块</span></div><div class="line">    block = ramDiskReplicaTracker.dequeueNextReplicaToPersist();</div><div class="line">    <span class="keyword">if</span> (block != <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">synchronized</span> (FsDatasetImpl.<span class="keyword">this</span>) &#123;</div><div class="line">        ...</div><div class="line">        <span class="comment">// 提交到异步服务中去</span></div><div class="line">          asyncLazyPersistService.submitLazyPersistTask(</div><div class="line">              block.getBlockPoolId(), block.getBlockId(),</div><div class="line">              replicaInfo.getGenerationStamp(), block.getCreationTime(),</div><div class="line">              replicaInfo.getMetaFile(), replicaInfo.getBlockFile(),</div><div class="line">              targetReference);</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">    succeeded = <span class="keyword">true</span>;</div><div class="line">  &#125; <span class="keyword">catch</span>(IOException ioe) &#123;</div><div class="line">    LOG.warn(<span class="string">"Exception saving replica "</span> + block, ioe);</div><div class="line">  &#125; <span class="keyword">finally</span> &#123;</div><div class="line">    <span class="keyword">if</span> (!succeeded &amp;&amp; block != <span class="keyword">null</span>) &#123;</div><div class="line">      LOG.warn(<span class="string">"Failed to save replica "</span> + block + <span class="string">". re-enqueueing it."</span>);</div><div class="line">      onFailLazyPersist(block.getBlockPoolId(), block.getBlockId());</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> succeeded;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<div align="center"><br> <img src="http://img.blog.csdn.net/20160529200024759" width="800" height="350" alt="图5" align="center"><br></div><br><div align="center"><br> 图五<br></div>
-
-<p>所以LazyWriter线程服务的流程图可以归纳为如图五所示。</p>
-<h2 id="RamDiskAsyncLazyPersistService"><a href="#RamDiskAsyncLazyPersistService" class="headerlink" title="RamDiskAsyncLazyPersistService"></a>RamDiskAsyncLazyPersistService</h2><p>RamDiskAsyncLazyPersistService主要围绕着Volume磁盘和Executor线程池这2部分的内容.秉持着下面一个原则</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">一个磁盘服务对应一个线程池,并且一个线程池的最大线程数也只有1个.</div></pre></td></tr></table></figure>
-<p>线程池列表定义如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">RamDiskAsyncLazyPersistService</span> </span>&#123;</div><div class="line">...</div><div class="line">  <span class="keyword">private</span> Map&lt;File, ThreadPoolExecutor&gt; executors</div><div class="line">      = <span class="keyword">new</span> HashMap&lt;File, ThreadPoolExecutor&gt;();</div><div class="line">...</div></pre></td></tr></table></figure>
-<p>当服务启动的时候,就会有新的磁盘目录加入.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">addVolume</span><span class="params">(File volume)</span> </span>&#123;</div><div class="line">  <span class="keyword">if</span> (executors == <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"AsyncLazyPersistService is already shutdown"</span>);</div><div class="line">  &#125;</div><div class="line">  ThreadPoolExecutor executor = executors.get(volume);</div><div class="line">  <span class="comment">// 如果当前已存在此磁盘目录对应的线程池,则跑异常</span></div><div class="line">  <span class="keyword">if</span> (executor != <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Volume "</span> + volume + <span class="string">" is already existed."</span>);</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// 否则进行添加</span></div><div class="line">  addExecutorForVolume(volume);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>进入addExecutorForVolume方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addExecutorForVolume</span><span class="params">(<span class="keyword">final</span> File volume)</span> </span>&#123;</div><div class="line">  ...</div><div class="line">  <span class="comment">// 新建线程池,最大线程执行数为</span></div><div class="line">  ThreadPoolExecutor executor = <span class="keyword">new</span> ThreadPoolExecutor(</div><div class="line">      CORE_THREADS_PER_VOLUME, MAXIMUM_THREADS_PER_VOLUME,</div><div class="line">      THREADS_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,</div><div class="line">      <span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(), threadFactory);</div><div class="line"></div><div class="line">  <span class="comment">// This can reduce the number of running threads</span></div><div class="line">  executor.allowCoreThreadTimeOut(<span class="keyword">true</span>);</div><div class="line">  <span class="comment">// 加入到executors中,以为volume作为key</span></div><div class="line">  executors.put(volume, executor);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>还有一个需要注意的是提交执行方法<strong>submitLazyPersistTask</strong>.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">submitLazyPersistTask</span><span class="params">(String bpId, <span class="keyword">long</span> blockId,</span></span></div><div class="line">    <span class="keyword">long</span> genStamp, <span class="keyword">long</span> creationTime,</div><div class="line">    File metaFile, File blockFile,</div><div class="line">    FsVolumeReference target) <span class="keyword">throws</span> IOException &#123;</div><div class="line">  <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</div><div class="line">    LOG.debug(<span class="string">"LazyWriter schedule async task to persist RamDisk block pool id: "</span></div><div class="line">        + bpId + <span class="string">" block id: "</span> + blockId);</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// 获取需要持久化到目标磁盘实例</span></div><div class="line">  FsVolumeImpl volume = (FsVolumeImpl)target.getVolume();</div><div class="line">  File lazyPersistDir  = volume.getLazyPersistDir(bpId);</div><div class="line">  <span class="keyword">if</span> (!lazyPersistDir.exists() &amp;&amp; !lazyPersistDir.mkdirs()) &#123;</div><div class="line">    FsDatasetImpl.LOG.warn(<span class="string">"LazyWriter failed to create "</span> + lazyPersistDir);</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"LazyWriter fail to find or create lazy persist dir: "</span></div><div class="line">        + lazyPersistDir.toString());</div><div class="line">  &#125;</div><div class="line">  <span class="comment">// 新建此服务Task</span></div><div class="line">  ReplicaLazyPersistTask lazyPersistTask = <span class="keyword">new</span> ReplicaLazyPersistTask(</div><div class="line">      bpId, blockId, genStamp, creationTime, blockFile, metaFile,</div><div class="line">      target, lazyPersistDir);</div><div class="line">  <span class="comment">// 提交到对应volume的线程池中执行</span></div><div class="line">  execute(volume.getCurrentDir(), lazyPersistTask);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>如果在上述执行的过程中发生失败,会调用失败处理的方法,并会重新将此副本块插入到replicateNotPersisted队列等待下一次的持久化.</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailLazyPersist</span><span class="params">(String bpId, <span class="keyword">long</span> blockId)</span> </span>&#123;</div><div class="line">  RamDiskReplica block = <span class="keyword">null</span>;</div><div class="line">  block = ramDiskReplicaTracker.getReplica(bpId, blockId);</div><div class="line">  <span class="keyword">if</span> (block != <span class="keyword">null</span>) &#123;</div><div class="line">    LOG.warn(<span class="string">"Failed to save replica "</span> + block + <span class="string">". re-enqueueing it."</span>);</div><div class="line">    <span class="comment">// 重新插入队列操作</span></div><div class="line">    ramDiskReplicaTracker.reenqueueReplicaNotPersisted(block);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<div align="center"><br> <img src="http://img.blog.csdn.net/20160529200337300" width="800" height="350" alt="图6" align="center"><br></div><br><div align="center"><br> 图六<br></div>
-
-<p>RamDiskAsyncLazyPersistService总的结构图如图6所示。</p>
-<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="安装RAM磁盘"><a href="#安装RAM磁盘" class="headerlink" title="安装RAM磁盘"></a>安装RAM磁盘</h2><p>使用Unix mount命令安装RAM磁盘分区。 例如。 在/ mnt / dn-tmpfs /下安装32 GB tmpfs分区</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo mount -t tmpfs -o size = 32g tmpfs / mnt / dn-tmpfs /</div></pre></td></tr></table></figure>
-<p>建议您在/ etc / fstab中创建一个条目，以便在节点重新启动时自动重新创建RAM磁盘。 另一个选项是使用/ dev / shm下的子目录，它是默认情况下在大多数Linux发行版上可用的tmpfs安装。 确保安装的大小大于或等于您的dfs.datanode.max.locked.memory设置，否则在/ etc / fstab中重写它。 不建议对每个数据节点使用多个tmpfs分区进行Lazy Persist写入。</p>
-<h2 id="使用RAM-DISK存储类型标记tmpfs卷"><a href="#使用RAM-DISK存储类型标记tmpfs卷" class="headerlink" title="使用RAM_DISK存储类型标记tmpfs卷"></a>使用RAM_DISK存储类型标记tmpfs卷</h2><p>通过hdfs-site.xml中的dfs.datanode.data.dir配置设置将tmpfs目录标记为RAM_DISK存储类型。 例如。 在具有三个硬盘卷/ grid / 0，/ grid / 1和/ grid / 2和tmpfs mount / mnt / dn-tmpfs的数据节点上，必须按如下所示设置dfs.datanode.data.dir：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.datanode.data.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>/grid/0,/grid/1,/grid/2,[RAM_DISK]/mnt/dn-tmpfs<span class="tag">&lt;/<span class="name">value</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></div></pre></td></tr></table></figure>
-<p>这一步是至关重要的。 如果没有RAM_DISK标记，HDFS会将tmpfs卷视为非易失性存储，并且数据不会保存到永久存储。 您将在节点重新启动时丢失数据。</p>
-<h2 id="启用存储策略"><a href="#启用存储策略" class="headerlink" title="启用存储策略"></a>启用存储策略</h2><p>使用上面提到的LAZY_PERSIST,而不是使用默认的StoragePolicy.DEFAULT,默认策略的存储介质是DISK类型的.设置存储策略的方法目前有2种:</p>
-<ul>
-<li>第一种,通过命令行的方式,调用如下命令</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hdfs storagepolicies -setStoragePolicy -path &lt;path&gt; -policy LAZY_PERSIST</div></pre></td></tr></table></figure>
-<ul>
-<li>第二种,通过调用对应的程序方法,比如调用暴露到外部的create文件方法,但是得带上参数CreateFlag.LAZY_PERSIST.例子如下:</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">FSDataOutputStream fos =</div><div class="line">        fs.create(</div><div class="line">            path,</div><div class="line">            FsPermission.getFileDefault(),</div><div class="line">            EnumSet.of(CreateFlag.CREATE, CreateFlag.LAZY_PERSIST),</div><div class="line">            bufferLength,</div><div class="line">            replicationFactor,</div><div class="line">            blockSize,</div><div class="line">            <span class="keyword">null</span>);</div></pre></td></tr></table></figure>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Lazy Persist策略可以损失一些持久化的保证，以减少延迟，达到懒持久的目的。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/MemoryStorage.html" title="Memory Storage Support in HDFS" target="_blank" rel="external">Memory Storage Support in HDFS</a></li>
-<li><a href="http://blog.csdn.net/androidlushangderen/article/details/51514216" title="HDFS内存存储" target="_blank" rel="external">HDFS内存存储 - 走在前往架构师的路上 - CSDN博客</a></li>
-</ul>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/09/hdfs lazy persist/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1917,27 +1460,14 @@
 
       
         
-          
-            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。</p>
-<h1 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h1><h2 id="查看tomcat日志"><a href="#查看tomcat日志" class="headerlink" title="查看tomcat日志"></a>查看tomcat日志</h2><p>因为tomcat启动失败，所以首先查看tomcat打印出来的相关日志。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tail -n 500 &#123;TOMCAT_HOME&#125;/logs/catalina.2017-08-08.log</div></pre></td></tr></table></figure>
-<p>里面确实有错误日志，其中这个错误日志引起的我的注意。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">Caused by: java.lang.IllegalArgumentException: LoggerFactory is not a Logback LoggerContext but Logback is on the classpath. Either remove Logback or the competing implementation (class org.slf4j.impl.Log4jLoggerFactory loaded from file:/export/App/apache-tomcat-8.5.16/webapps/k8s-api/WEB-INF/lib/slf4j-log4j12-1.7.5.jar). If you are using WebLogic you will need to add &apos;org.slf4j&apos; to prefer-application-packages in WEB-INF/weblogic.xml Object of class [org.slf4j.impl.Log4jLoggerFactory] must be an instance of class ch.qos.logback.classic.LoggerContext</div><div class="line">	at org.springframework.util.Assert.isInstanceOf(Assert.java:346)</div><div class="line">	at org.springframework.boot.logging.logback.LogbackLoggingSystem.getLoggerContext(LogbackLoggingSystem.java:221)</div><div class="line">	at org.springframework.boot.logging.logback.LogbackLoggingSystem.getLogger(LogbackLoggingSystem.java:213)</div><div class="line">	at org.springframework.boot.logging.logback.LogbackLoggingSystem.beforeInitialize(LogbackLoggingSystem.java:98)</div><div class="line">	at org.springframework.boot.logging.LoggingApplicationListener.onApplicationStartedEvent(LoggingApplicationListener.java:216)</div><div class="line">	at org.springframework.boot.logging.LoggingApplicationListener.onApplicationEvent(LoggingApplicationListener.java:198)</div><div class="line">	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:163)</div><div class="line">	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:136)</div><div class="line">	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:119)</div><div class="line">	at org.springframework.boot.context.event.EventPublishingRunListener.publishEvent(EventPublishingRunListener.java:111)</div><div class="line">	at org.springframework.boot.context.event.EventPublishingRunListener.started(EventPublishingRunListener.java:60)</div><div class="line">	at org.springframework.boot.SpringApplicationRunListeners.started(SpringApplicationRunListeners.java:48)</div><div class="line">	at org.springframework.boot.SpringApplication.run(SpringApplication.java:303)</div><div class="line">	at org.springframework.boot.context.web.SpringBootServletInitializer.run(SpringBootServletInitializer.java:149)</div><div class="line">	at org.springframework.boot.context.web.SpringBootServletInitializer.createRootApplicationContext(SpringBootServletInitializer.java:129)</div><div class="line">	at org.springframework.boot.context.web.SpringBootServletInitializer.onStartup(SpringBootServletInitializer.java:85)</div><div class="line">	at org.springframework.web.SpringServletContainerInitializer.onStartup(SpringServletContainerInitializer.java:175)</div><div class="line">	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5196)</div><div class="line">	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:150)</div><div class="line">	... 10 more</div></pre></td></tr></table></figure>
-<p>关键的信息在这里</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">LoggerFactory is not a Logback LoggerContext but Logback is on the classpath. Either remove Logback or the competing implementation (class org.slf4j.impl.Log4jLoggerFactory loaded from file:/export/App/apache-tomcat-8.5.16/webapps/k8s-api/WEB-INF/lib/slf4j-log4j12-1.7.5.jar).</div></pre></td></tr></table></figure>
-<p>大概就是说<strong>Logback</strong>已经在<strong>classpath</strong>中存在，这时候就应该意识到有<strong>Logback</strong>依赖冲突，在多个地方都有Logback的依赖。</p>
-<p>我的pom.xml文件如下</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">      <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line">      ...</div><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>slf4j-log4j12<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;slf4j.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
-<h2 id="使用maven命令，查看依赖树"><a href="#使用maven命令，查看依赖树" class="headerlink" title="使用maven命令，查看依赖树"></a>使用maven命令，查看依赖树</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mvn dependency:tree</div></pre></td></tr></table></figure>
-<p>查看结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">[INFO] +- org.springframework.boot:spring-boot-starter:jar:1.3.3.RELEASE:compile</div><div class="line">[INFO] |  +- org.springframework.boot:spring-boot:jar:1.3.3.RELEASE:compile</div><div class="line">[INFO] |  +- org.springframework.boot:spring-boot-autoconfigure:jar:1.3.3.RELEASE:compile</div><div class="line">[INFO] |  +- org.springframework.boot:spring-boot-starter-logging:jar:1.3.3.RELEASE:compile</div><div class="line">[INFO] |  |  +- ch.qos.logback:logback-classic:jar:1.1.5:compile</div><div class="line">[INFO] |  |  |  \- ch.qos.logback:logback-core:jar:1.1.5:compile</div><div class="line">[INFO] |  |  +- org.slf4j:jcl-over-slf4j:jar:1.7.5:compile</div><div class="line">[INFO] |  |  +- org.slf4j:jul-to-slf4j:jar:1.7.5:compile</div><div class="line">[INFO] |  |  \- org.slf4j:log4j-over-slf4j:jar:1.7.5:compile</div><div class="line">[INFO] |  +- org.springframework:spring-core:jar:4.2.5.RELEASE:compile</div><div class="line">[INFO] |  \- org.yaml:snakeyaml:jar:1.16:compile</div><div class="line">...</div><div class="line">[INFO] +- org.slf4j:slf4j-log4j12:jar:1.7.5:compile</div><div class="line">[INFO] |  \- org.slf4j:slf4j-api:jar:1.7.5:compile</div></pre></td></tr></table></figure>
-<p>可以从上面的结果中很清楚的看见org.slf4j:log4j-over-slf4j:jar:1.7.5这个包冲突了，所以我们只需要去掉其中一个Logback的依赖即可。</p>
-<h2 id="解决依赖冲突"><a href="#解决依赖冲突" class="headerlink" title="解决依赖冲突"></a>解决依赖冲突</h2><p>如下方法可以去掉多余的依赖</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">     <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">         <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></div><div class="line">             <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></div><div class="line">                 <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">                 <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-logging<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">             <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></div><div class="line">         <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></div><div class="line">     <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
-<p>再重新启动tomcat，成功。</p>
-<h1 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h1><p>在执行mvn的命令，如update，install之前，必须要先clean一下，否则可能会有之前的依赖还保留在里面。</p>
-
-          
+          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在部署一个spring-boot项目到远程测试机上的tomcat之后，发现tomcat并没有启动起来，让我折腾了近2个小时，现在将解决思路以及解决方法记录下来，下次在遇到Maven依赖冲突之后，能够很快的解决。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/08/maven_conflict/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2076,41 +1606,20 @@
 
       
         
-          
-            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
+          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
 
 <ul>
 <li><strong>Namespace</strong> 管理目录，文件和数据块。它支持常见的文件系统操作，如创建文件，修改文件，删除文件等。</li>
 <li><strong>Block Storage</strong> 由两部分组成：<strong>Block Management</strong>维护集群中datanode的基本关系，它支持数据块相关的操作，如：创建数据块，删除数据块等，同时，它也会管理副本的复制和存放。<strong>Physical Storage</strong>存储实际的数据块并提供针对数据块的读写服务。</li>
 </ul>
 <p>以前的HDFS架构只允许一个集群拥有一个命名空间，一个Namenode管理着整个命名空间。HDFS Federation通过向HDFS增加多Namenode和namespace来解决这种限制。</p>
-<h1 id="HDFS-Federation"><a href="#HDFS-Federation" class="headerlink" title="HDFS Federation"></a>HDFS Federation</h1><blockquote>
-<p>HDFS Federation是Hadoop最新发布版本Hadoop-0.23.0中为解决HDFS单点故障而提出的namenode水平扩展方案。该方案允许HDFS创建多个namespace以提高集群的扩展性和隔离性。本篇文章主要介绍了HDFS Federation的设计动机和基本原理。</p>
-</blockquote>
-<div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation.gif" width="550" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图二<br></div>
-
-<p>为了水平扩展name service，Federation使用了独立的多Namenode/Namespaces的架构。这些namenode之间是联合的，也就是说，他们之间相互独立且不需要互相协调，各自分工，管理自己的区域。（The Namenodes are federated; the Namenodes are independent and do not require coordination with each other.）Datanode被用作是存储设备，在集群中，每一个Datanode都在Namenodes上注册。Datanodes周期性的发送心跳包和关于块的报告。Datanodes也要处理来自Namenodes的命令。</p>
-<h2 id="几个关键的概念"><a href="#几个关键的概念" class="headerlink" title="几个关键的概念"></a>几个关键的概念</h2><ul>
-<li><strong>Block Pool</strong> 块池，一个Block Pool是属于同一个namespace下的一组块集合。每个datanode可能会存储集群中所有Block Pool的数据块。（Datanodes store blocks for all the block pools in the cluster.）每个Block Pool的管理是独立的。这样的好处是，允许一个namespace为一个新的块生成一个Block IDs，而不需要和其他的namespace进行协调。一个namenode挂掉了，不会影响其他namenode。</li>
-<li><strong>Namespace Volume</strong> 一个namespace和它的Block Pool一起被统称为Namespace Volume。它是管理的最小单元。当一个Namenode/namespace被删除之后，每个Datanode上相应的Block Pool也会被删除。每个Namespace Volume是升级的最小的一个单元。</li>
-<li><strong>ClusterID</strong> 一个新的标识ClusterID添加到集群，用来标记所有的Nodes，当Namenode格式化时(formated)，将会自动创建ClusterID，这个ID用来区分集群中的Namenodes。</li>
-</ul>
-<h2 id="Namespace的管理"><a href="#Namespace的管理" class="headerlink" title="Namespace的管理"></a>Namespace的管理</h2><div align="center"><br> <img src="http://dongxicheng.org/wp-content/uploads/2011/12/client-side-mount-table.jpg" width="400" height="250" alt="图1" align="center"><br></div><br><div align="center"><br> 图三<br></div>
-
-<p>Federation中存在多个命名空间，如何划分和管理这些命名空间非常关键。在Federation中并采用“文件名hash”的方法，因为该方法的locality非常差，比如：查看某个目录下面的文件，如果采用文件名hash的方法存放文件，则这些文件可能被放到不同namespace中，HDFS需要访问所有namespace，代价过大。为了方便管理多个命名空间，HDFS Federation采用了经典的Client Side Mount Table。</p>
-<p>如图三所示，下面四个深色三角形代表一个独立的命名空间，上方浅色的三角形代表从客户角度去访问的子命名空间。各个深色的命名空间Mount到浅色的表中，客户可以访问不同的挂载点来访问不同的命名空间，这就如同在Linux系统中访问不同挂载点一样。这就是HDFS Federation中命名空间管理的基本原理：将各个命名空间挂载到全局mount-table中，就可以做将数据到全局共享；同样的命名空间挂载到个人的mount-table中，这就成为应用程序可见的命名空间视图。</p>
-<h2 id="HDFS-Federation的优势"><a href="#HDFS-Federation的优势" class="headerlink" title="HDFS Federation的优势"></a>HDFS Federation的优势</h2><ul>
-<li><strong>命名空间的扩展.</strong>因为随着集群使用时间的加长,HDFS上存放的数据也将会越来越多.这个时候如果还是将所有的数据都往一个NameNode上存放,这个文件系统会显得非常的庞大.这时候我们可以进行横向扩展,把一些大的目录分离出去.使得每个NameNode下的数据看起来更加的精简。</li>
-<li><strong>性能的提升.</strong>这个也很好理解.当NameNode所持有的数据量达到了一个非常大规模的量级的时候(比如超过1亿个文件),这个时候NameNode的处理效率可能就会有影响,它可能比较容易的会陷入一个繁忙的状态.而整个集群将会受限于一个单点NameNode的处理效率,从而影响集群整体的吞吐量.这个时候多NameNode机制显然可以减轻很多这部分的压力。</li>
-<li><strong>资源的隔离.</strong>这一点考虑的就比较深了.通过多个命名空间,我们可以将关键数据文件目录移到不同的NameNode上,以此不让这些关键数据的读写操作受到其他普通文件读写操作的影响.也就是说这些NameNode将会只处理特定的关键的任务所发来的请求,而屏蔽了其他普通任务的文件读写请求,以此做到了资源的隔离.千万不要小看这一点,当你发现NameNode正在处理某个不良任务的大规模的请求操作导致响应速度极慢时,你一定会非常的懊恼。</li>
-</ul>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/Federation.html" title="Apache Hadoop 2.7.2 – HDFS Federation" target="_blank" rel="external">https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/Federation.html</a></li>
-<li><a href="http://dongxicheng.org/mapreduce/hdfs-federation-introduction/" title="董的博客 » HDFS Federation设计动机与基本原理" target="_blank" rel="external">http://dongxicheng.org/mapreduce/hdfs-federation-introduction/</a></li>
-<li><a href="http://blog.csdn.net/androidlushangderen/article/details/52135506" title="HDFS Federation机制 - 走在前往架构师的路上" target="_blank" rel="external">http://blog.csdn.net/androidlushangderen/article/details/52135506</a></li>
-</ul>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/06/HDFS Federation/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>

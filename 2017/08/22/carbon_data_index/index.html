@@ -126,7 +126,7 @@
 <meta property="og:image" content="https://lh6.googleusercontent.com/9b6AjZZQC9SS21XZzOkQazKZZZmTM_gyGWUr0hRnCYHoRjWpx3KVZlNcx5EWumCzDLNnH3Ue_BkwUmfF4nu7gGHraUNUUZVMF5yY-1d_3SpkUkwVuoa4pYPnunlzrAUn1TkFVHqb">
 <meta property="og:image" content="https://lh4.googleusercontent.com/GVYFMlOKuvVxT5znrGszndlucag1KIoy6Dcf7lypul81VAO0IdMt4H7kUtDrzJfIqIzTcGOAf6DOav0bC2KmXTlkmQud-IrgVdXdElcFEY__7OrQZbL7_6CpHP_NqV0QajY3AYTv">
 <meta property="og:image" content="https://lh4.googleusercontent.com/ZAiDBLaX1yvEH24C7IoU68wGYdtdOdu2K_AjQcvw2waZrJJHhoSc2I0PHphvBcSOWulvcqlfweNvhCMMdQLtXxaRZpc6ze7kc3Up8-q59Gw9FN62IA1240UJnSmsp27A2fdxL9lN">
-<meta property="og:updated_time" content="2017-08-22T04:01:50.342Z">
+<meta property="og:updated_time" content="2017-09-08T09:40:35.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Carbon Data 多级索引">
 <meta name="twitter:description" content="INTRODUCTION 介绍 Apache CarbonData has Rich Multi-Level Index Support.  Apache CarbonData有丰富的多级索引支持。 DESCRIPTION 描述 Apache CarbonData uses multiple indexes at various levels to enable faster search and">
@@ -419,6 +419,7 @@
 <p>Using indexes, we can efficiently find the position of the data that is  required while skipping the parts of data that are not required (need not be processed) and hence results in faster query processing.</p>
 </blockquote>
 <p>使用索引，我们能更有效的找到数据的位置，因为我们能跳过我们不需要的数据，因此会加速查询操作。</p>
+<a id="more"></a>
 <blockquote>
 <p>Storing data along with index significantly accelerates query performance and reduces the I/O scans and CPU resources in case of filters in the query. CarbonData index consists of multiple levels of indices, a processing framework can leverage this index to reduce the number of tasks it needs to schedule and process. It can also do skip scan in more fine grained units (called blocklet) in task side scanning instead of scanning the whole file.</p>
 </blockquote>

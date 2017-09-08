@@ -112,23 +112,23 @@
 
 
 
-<meta name="description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。 创建Pair RDD在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可">
+<meta name="description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。">
 <meta name="keywords" content="spark">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark Pair RDD 键值对操作">
 <meta property="og:url" content="http://yoursite.com/2017/08/15/spark_pair_rdd/index.html">
 <meta property="og:site_name" content="Han 博客">
-<meta property="og:description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。 创建Pair RDD在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可">
+<meta property="og:description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/images/spark_pair_rdd_1.jpg">
 <meta property="og:image" content="http://yoursite.com/images/spark_pair_rdd_2.png">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/5593513-98844d200b521443.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/5593513-227dfccabba70350.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/5593513-3de9ca6517698707.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2017-08-15T10:08:33.466Z">
+<meta property="og:updated_time" content="2017-09-08T09:41:15.807Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Spark Pair RDD 键值对操作">
-<meta name="twitter:description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。 创建Pair RDD在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可">
+<meta name="twitter:description" content="概述Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。">
 <meta name="twitter:image" content="http://yoursite.com/images/spark_pair_rdd_1.jpg">
 
 
@@ -407,6 +407,7 @@
 
       
         <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Spark为包含键值对类型的RDD提供了一些专有的操作。这些RDD被称为pair RDD。Pair RDD是很多程序的构成要素，因为它们提供了并行操作各个键或跨节点重新进行数据分组的操作接口。</p>
+<a id="more"></a>
 <h1 id="创建Pair-RDD"><a href="#创建Pair-RDD" class="headerlink" title="创建Pair RDD"></a>创建Pair RDD</h1><p>在saprk中有很多种创建pairRDD的方式，很多存储键值对的数据格式会在读取时直接返回由其键值对数据组成的pair RDD，此外需要把一个普通的RDD转化为pair RDD时，可以调用map函数来实现，传递的函数需要返回键值对。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val arr = sc.parallelize(List(1, 2, 3, 3))</div><div class="line">arr: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[0] at parallelize at &lt;console&gt;:24</div></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; val pairs = arr.map(x =&gt; (x, x + 1))</div><div class="line">pairs: org.apache.spark.rdd.RDD[(Int, Int)] = MapPartitionsRDD[1] at map at &lt;console&gt;:26</div></pre></td></tr></table></figure>
