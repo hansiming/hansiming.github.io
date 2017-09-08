@@ -112,18 +112,18 @@
 
 
 
-<meta name="description" content="Mysql : Mysql的备份和还原—-问题背景 这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：  有误操作的时候，可以进行还原，防止数据遗失。 做数据库的容灾，在其他数据库上做备份。">
+<meta name="description" content="Mysql : Mysql的备份和还原问题背景这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：  有误操作的时候，可以进行还原，防止数据遗失。 做数据库的容灾，在其他数据库上做备份。">
 <meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mysql的备份和还原">
 <meta property="og:url" content="http://yoursite.com/2017/09/02/mysql_backup/index.html">
 <meta property="og:site_name" content="Han 博客">
-<meta property="og:description" content="Mysql : Mysql的备份和还原—-问题背景 这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：  有误操作的时候，可以进行还原，防止数据遗失。 做数据库的容灾，在其他数据库上做备份。">
+<meta property="og:description" content="Mysql : Mysql的备份和还原问题背景这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：  有误操作的时候，可以进行还原，防止数据遗失。 做数据库的容灾，在其他数据库上做备份。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-08T09:53:14.617Z">
+<meta property="og:updated_time" content="2017-09-08T09:55:32.438Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mysql的备份和还原">
-<meta name="twitter:description" content="Mysql : Mysql的备份和还原—-问题背景 这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：  有误操作的时候，可以进行还原，防止数据遗失。 做数据库的容灾，在其他数据库上做备份。">
+<meta name="twitter:description" content="Mysql : Mysql的备份和还原问题背景这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：  有误操作的时候，可以进行还原，防止数据遗失。 做数据库的容灾，在其他数据库上做备份。">
 
 
 
@@ -400,8 +400,7 @@
       
 
       
-        <h1 id="Mysql-Mysql的备份和还原"><a href="#Mysql-Mysql的备份和还原" class="headerlink" title="Mysql : Mysql的备份和还原"></a>Mysql : Mysql的备份和还原</h1><h2 id="—"><a href="#—" class="headerlink" title="—-"></a>—-</h2><h2 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h2><hr>
-<p>这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：</p>
+        <h1 id="Mysql-Mysql的备份和还原"><a href="#Mysql-Mysql的备份和还原" class="headerlink" title="Mysql : Mysql的备份和还原"></a>Mysql : Mysql的备份和还原</h1><h2 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h2><p>这两天在做Mysql的数据备份和还原，查询了很多资料，记录下来，主要的需求是：</p>
 <ul>
 <li>有误操作的时候，可以进行还原，防止数据遗失。</li>
 <li>做数据库的容灾，在其他数据库上做备份。</li>
@@ -646,7 +645,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mysql-Mysql的备份和还原"><span class="nav-number">1.</span> <span class="nav-text">Mysql : Mysql的备份和还原</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#—"><span class="nav-number">1.1.</span> <span class="nav-text">—-</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题背景"><span class="nav-number">1.2.</span> <span class="nav-text">问题背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">1.3.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysqldump"><span class="nav-number">1.4.</span> <span class="nav-text">mysqldump</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysqlbinlog"><span class="nav-number">1.5.</span> <span class="nav-text">mysqlbinlog</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#命令行参数"><span class="nav-number">1.5.1.</span> <span class="nav-text">命令行参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统变量"><span class="nav-number">1.5.2.</span> <span class="nav-text">系统变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志切换策略"><span class="nav-number">1.5.3.</span> <span class="nav-text">日志切换策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#清除binlog"><span class="nav-number">1.5.4.</span> <span class="nav-text">清除binlog</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysqlbinlog方式提取binlog"><span class="nav-number">1.5.5.</span> <span class="nav-text">mysqlbinlog方式提取binlog</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实例"><span class="nav-number">1.6.</span> <span class="nav-text">实例</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mysql-Mysql的备份和还原"><span class="nav-number">1.</span> <span class="nav-text">Mysql : Mysql的备份和还原</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题背景"><span class="nav-number">1.1.</span> <span class="nav-text">问题背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">1.2.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysqldump"><span class="nav-number">1.3.</span> <span class="nav-text">mysqldump</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysqlbinlog"><span class="nav-number">1.4.</span> <span class="nav-text">mysqlbinlog</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#命令行参数"><span class="nav-number">1.4.1.</span> <span class="nav-text">命令行参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统变量"><span class="nav-number">1.4.2.</span> <span class="nav-text">系统变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志切换策略"><span class="nav-number">1.4.3.</span> <span class="nav-text">日志切换策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#清除binlog"><span class="nav-number">1.4.4.</span> <span class="nav-text">清除binlog</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysqlbinlog方式提取binlog"><span class="nav-number">1.4.5.</span> <span class="nav-text">mysqlbinlog方式提取binlog</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实例"><span class="nav-number">1.5.</span> <span class="nav-text">实例</span></a></li></ol></li></ol></div>
             
 
           </div>
