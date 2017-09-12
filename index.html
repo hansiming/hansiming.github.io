@@ -1224,6 +1224,193 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/12/hadoop_rpc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="韩思明">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Han 博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/08/12/hadoop_rpc/" itemprop="url">Hadoop YARN 源码阅读（一）Hadoop RPC 源码详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-12T21:15:01+08:00">
+                2017-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hadoop/" itemprop="url" rel="index">
+                    <span itemprop="name">hadoop</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="RPC简介"><a href="#RPC简介" class="headerlink" title="RPC简介"></a>RPC简介</h1><p><img src="http://7xiur2.com1.z0.glb.clouddn.com/0585.png" alt=""></p>
+<blockquote>
+<p>RPC是一种通过网络从远程计算机上请求服务的机制，封装了具体实现，使用户不需要了解底层网络技术。目前存在许多开源RPC框架，比较有名的有Thrift、Protocol Buffers和Avro。Hadoop RPC与他们一样，均由两部分组成：对象序列化和远程过程调用。</p>
+</blockquote>
+<p>通俗来讲，以接口和接口中的方法作为协议，然后客户端向服务端发送请求，请求中包括具体的接口和接口方法，而实际的操作在服务端执行，服务端执行完成之后，再通过网络将响应传回给客户端。</p>
+<p>在整个RPC调用中具体包括了四层：</p>
+<ul>
+<li><strong>序列化层</strong>：序列化主要作用是将结构化对象转为字节流以便于通过网络进行传输或写入持久存储,在RPC框架中。我们常见的有Java JDK默认实现的序列化，Google开源的Protocol Buffers等等，在Hadoop2.6.0中已经提供了Hadoop默认的基于Writeable和Protocol Buffers的序列化方式。</li>
+<li><strong>函数调用层</strong>：函数调用层主要功能是定位要调用的函数并执行该函数，如上图所示，Hadoop RPC采用了Java反射机制（服务器端）与动态代理（客户端）实现了函数调用。</li>
+<li><strong>网络传输层</strong>：网络传输层描述了Client与Server之间消息传输的方式，Hadoop RPC采用了基于TCP/IP的Socket机制。</li>
+<li><strong>服务器端处理框架</strong>：服务器端处理框架可被抽象为网络I/O模型，它描述了客户端与服务器端间信息交互方式。</li>
+</ul>
+<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><ul>
+<li>动态代理：通过实现InvocationHandler接口实现。<a href="http://www.cnblogs.com/a294098789/p/5601089.html" target="_blank" rel="external">动态代理实现</a></li>
+<li>Java NIO：底层通过多路复用实现的IO。<a href="http://www.cnblogs.com/a294098789/p/5676566.html" target="_blank" rel="external">java nio手动实现简单的http服务器</a></li>
+</ul>
+<h1 id="Hadoop-RPC-Demo"><a href="#Hadoop-RPC-Demo" class="headerlink" title="Hadoop RPC Demo"></a>Hadoop RPC Demo</h1><p>下面先一步一步的使用Hadoop实现的RPC框架来实现RPC调用。</p>
+<ul>
+<li>首先添加Maven依赖，Hadoop RPC主要是在common包中实现。</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.hadoop<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hadoop-common<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">      <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>实现ClientProtocol类，该类定义了接口协议，在该接口中，我们定义了两个方法，echo和add。值得注意的是，在Hadoop中所有的协议接口都需要实现VersionedProtocol接口。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.VersionedProtocol;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * RPC Protocol 类</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ClientProtocol</span> <span class="keyword">extends</span> <span class="title">VersionedProtocol</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> versionID = <span class="number">1L</span>;</div><div class="line">    <span class="function">String <span class="title">echo</span><span class="params">(String value)</span> <span class="keyword">throws</span> IOException</span>;</div><div class="line">    <span class="function"><span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> <span class="keyword">throws</span> IOException</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>客户端类，可以看到通过PRC.getProxy方法得到了客户端的代理类，暂时先不管内部的具体实现。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configuration;</div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.RPC;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * 客户端类</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ADDRESS = <span class="string">"localhost"</span>;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">9010</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        Configuration conf = <span class="keyword">new</span> Configuration();</div><div class="line">        <span class="comment">//server ip and port</span></div><div class="line">        InetSocketAddress inetSocketAddress = <span class="keyword">new</span> InetSocketAddress(ADDRESS, PORT);</div><div class="line">        <span class="comment">//get client proxy</span></div><div class="line">        ClientProtocol client = RPC.getProxy(ClientProtocol.class, ClientProtocol.versionID, inetSocketAddress, conf);</div><div class="line">        System.out.println(client.add(<span class="number">3</span>, <span class="number">5</span>));</div><div class="line">        System.out.println(client.echo(<span class="string">"rpc!"</span>));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>现在来到服务端，首先编写具体的实现类ClientProtocolImpl，实现了协议ClientProtocol接口。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.ProtocolSignature;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * 具体实现类</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClientProtocolImpl</span> <span class="keyword">implements</span> <span class="title">ClientProtocol</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">echo</span><span class="params">(String value)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> value;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> a + b;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getProtocolVersion</span><span class="params">(String s, <span class="keyword">long</span> l)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> ClientProtocol.versionID;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> ProtocolSignature <span class="title">getProtocolSignature</span><span class="params">(String s, <span class="keyword">long</span> l, <span class="keyword">int</span> i)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ProtocolSignature(ClientProtocol.versionID, <span class="keyword">null</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>服务端类，我们可以看见除了ip和port之外，还有一些其他的参数。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">package com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line">import org.apache.hadoop.conf.Configuration;</div><div class="line">import org.apache.hadoop.ipc.RPC;</div><div class="line"></div><div class="line">import java.io.IOException;</div><div class="line"></div><div class="line">/**</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line">public class Server &#123;</div><div class="line"></div><div class="line">    public static final String ADDRESS = &quot;localhost&quot;;</div><div class="line">    public static final int PORT = 9010;</div><div class="line"></div><div class="line">    public static void main(String[] args) throws IOException &#123;</div><div class="line">        Configuration conf = new Configuration();</div><div class="line">        //set server ip, port, protocol instance, protocol, handler num</div><div class="line">        org.apache.hadoop.ipc.Server server = new RPC.Builder(conf).setBindAddress(ADDRESS)</div><div class="line">                .setPort(PORT).setInstance(new ClientProtocolImpl()).setProtocol(ClientProtocol.class)</div><div class="line">                .setNumHandlers(5).build();</div><div class="line">        server.start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>下面我们先启动Server类，在启动Client类去调用Server端，就可以返回我们想要的结果，一个简单的Hadoop RPC就实现了。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">8</div><div class="line">rpc!</div><div class="line"></div><div class="line">Process finished with exit code 0</div></pre></td></tr></table></figure>
+<h1 id="Hadoop-RPC-源码分析"><a href="#Hadoop-RPC-源码分析" class="headerlink" title="Hadoop RPC 源码分析"></a>Hadoop RPC 源码分析</h1><h2 id="org-apache-hadoop-ipc-Client"><a href="#org-apache-hadoop-ipc-Client" class="headerlink" title="org.apache.hadoop.ipc.Client"></a>org.apache.hadoop.ipc.Client</h2><p>我们先来分析Client这个类，该类有如下的内部类，我们把里面几个比较重点的内部类拿出来单独讲</p>
+<p><img src="http://www.cszjo.com/images/hadoop_rpc_client.png" alt=""></p>
+<h3 id="ConnectionId"><a href="#ConnectionId" class="headerlink" title="ConnectionId"></a>ConnectionId</h3><p>ConnectionId的成员变量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 一个ConnectionId唯一的标注一个Connection，主要通过以下属性&lt;remoteAddress, protocol, ticket&gt;</div><div class="line"> */</div><div class="line"><span class="meta">@InterfaceAudience</span>.LimitedPrivate(&#123;<span class="string">"HDFS"</span>, <span class="string">"MapReduce"</span>&#125;)</div><div class="line"><span class="meta">@InterfaceStability</span>.Evolving</div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ConnectionId</span> </span>&#123;</div><div class="line">  <span class="comment">//address 指定了ip和port</span></div><div class="line">  InetSocketAddress address;</div><div class="line">  <span class="comment">//user ticket</span></div><div class="line">  UserGroupInformation ticket;</div><div class="line">  <span class="comment">//protocol 协议接口类</span></div><div class="line">  <span class="keyword">final</span> Class&lt;?&gt; protocol;</div><div class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PRIME = <span class="number">16777619</span>;</div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> rpcTimeout;</div><div class="line">  <span class="comment">//Connection最大空闲时间，超过会被剔除</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> maxIdleTime; <span class="comment">//connections will be culled if it was idle for </span></div><div class="line">  <span class="comment">//重试策略</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> RetryPolicy connectionRetryPolicy;</div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> maxRetriesOnSasl;</div><div class="line">  <span class="comment">// the max. no. of retries for socket connections on time out exceptions</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> maxRetriesOnSocketTimeouts;</div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> tcpNoDelay; <span class="comment">// if T then disable Nagle's Algorithm</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> doPing; <span class="comment">//do we need to send ping message</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> pingInterval; <span class="comment">// how often sends ping to the server in msecs</span></div><div class="line">  <span class="keyword">private</span> String saslQop; <span class="comment">// here for testing</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> Configuration conf; <span class="comment">// used to get the expected kerberos principal name</span></div></pre></td></tr></table></figure>
+<p><img src="http://www.cszjo.com/images/hadoop_rpc_server.png" alt=""></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/11/spark_word_count/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1651,161 +1838,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/06/HDFS Federation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="韩思明">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Han 博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/08/06/HDFS Federation/" itemprop="url">HDFS Federation</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-06T20:23:55+08:00">
-                2017-08-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hdfs/" itemprop="url" rel="index">
-                    <span itemprop="name">hdfs</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><div align="center"><br> <img src="https://hadoop.apache.org/docs/r2.7.2/hadoop-project-dist/hadoop-hdfs/images/federation-background.gif" width="500" height="350" alt="图1" align="center"><br></div><br><div align="center"><br> 图一<br></div>
-
-<ul>
-<li><strong>Namespace</strong> 管理目录，文件和数据块。它支持常见的文件系统操作，如创建文件，修改文件，删除文件等。</li>
-<li><strong>Block Storage</strong> 由两部分组成：<strong>Block Management</strong>维护集群中datanode的基本关系，它支持数据块相关的操作，如：创建数据块，删除数据块等，同时，它也会管理副本的复制和存放。<strong>Physical Storage</strong>存储实际的数据块并提供针对数据块的读写服务。</li>
-</ul>
-<p>以前的HDFS架构只允许一个集群拥有一个命名空间，一个Namenode管理着整个命名空间。HDFS Federation通过向HDFS增加多Namenode和namespace来解决这种限制。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/08/06/HDFS Federation/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -1849,7 +1888,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1860,7 +1899,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1871,7 +1910,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
