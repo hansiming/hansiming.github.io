@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="YARN," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="RPC简介  RPC是一种通过网络从远程计算机上请求服务的机制，封装了具体实现，使用户不需要了解底层网络技术。目前存在许多开源RPC框架，比较有名的有Thrift、Protocol Buffers和Avro。Hadoop RPC与他们一样，均由两部分组成：对象序列化和远程过程调用。  通俗来讲，以接口和接口中的方法作为协议，然后客户端向服务端发送请求，请求中包括具体的接口和接口方法，而实际的操作在">
+<meta name="keywords" content="YARN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop YARN 源码阅读（一）Hadoop RPC 源码详解">
+<meta property="og:url" content="http://yoursite.com/2017/09/16/hadoop_rpc/index.html">
+<meta property="og:site_name" content="Han 博客">
+<meta property="og:description" content="RPC简介  RPC是一种通过网络从远程计算机上请求服务的机制，封装了具体实现，使用户不需要了解底层网络技术。目前存在许多开源RPC框架，比较有名的有Thrift、Protocol Buffers和Avro。Hadoop RPC与他们一样，均由两部分组成：对象序列化和远程过程调用。  通俗来讲，以接口和接口中的方法作为协议，然后客户端向服务端发送请求，请求中包括具体的接口和接口方法，而实际的操作在">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://7xiur2.com1.z0.glb.clouddn.com/0585.png">
+<meta property="og:image" content="http://www.cszjo.com/images/hadoop_rpc_client.png">
+<meta property="og:image" content="http://www.cszjo.com/images/hadoop_rpc_server.png">
+<meta property="og:updated_time" content="2017-09-18T12:32:13.281Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hadoop YARN 源码阅读（一）Hadoop RPC 源码详解">
+<meta name="twitter:description" content="RPC简介  RPC是一种通过网络从远程计算机上请求服务的机制，封装了具体实现，使用户不需要了解底层网络技术。目前存在许多开源RPC框架，比较有名的有Thrift、Protocol Buffers和Avro。Hadoop RPC与他们一样，均由两部分组成：对象序列化和远程过程调用。  通俗来讲，以接口和接口中的方法作为协议，然后客户端向服务端发送请求，请求中包括具体的接口和接口方法，而实际的操作在">
+<meta name="twitter:image" content="http://7xiur2.com1.z0.glb.clouddn.com/0585.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/09/16/hadoop_rpc/"/>
+
+
+
+
+
+  <title>Hadoop YARN 源码阅读（一）Hadoop RPC 源码详解 | Han 博客</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61353e23b8e42a3b785fab01ab47ccba";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Han 博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/09/16/hadoop_rpc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="韩思明">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Han 博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hadoop YARN 源码阅读（一）Hadoop RPC 源码详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-16T21:15:01+08:00">
+                2017-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hadoop/" itemprop="url" rel="index">
+                    <span itemprop="name">hadoop</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="RPC简介"><a href="#RPC简介" class="headerlink" title="RPC简介"></a>RPC简介</h1><p><img src="http://7xiur2.com1.z0.glb.clouddn.com/0585.png" alt=""></p>
+<blockquote>
+<p>RPC是一种通过网络从远程计算机上请求服务的机制，封装了具体实现，使用户不需要了解底层网络技术。目前存在许多开源RPC框架，比较有名的有Thrift、Protocol Buffers和Avro。Hadoop RPC与他们一样，均由两部分组成：对象序列化和远程过程调用。</p>
+</blockquote>
+<p>通俗来讲，以接口和接口中的方法作为协议，然后客户端向服务端发送请求，请求中包括具体的接口和接口方法，而实际的操作在服务端执行，服务端执行完成之后，再通过网络将响应传回给客户端。</p>
+<a id="more"></a>
+<p>在整个RPC调用中具体包括了四层：</p>
+<ul>
+<li><strong>序列化层</strong>：序列化主要作用是将结构化对象转为字节流以便于通过网络进行传输或写入持久存储,在RPC框架中。我们常见的有Java JDK默认实现的序列化，Google开源的Protocol Buffers等等，在Hadoop2.6.0中已经提供了Hadoop默认的基于Writeable和Protocol Buffers的序列化方式。</li>
+<li><strong>函数调用层</strong>：函数调用层主要功能是定位要调用的函数并执行该函数，如上图所示，Hadoop RPC采用了Java反射机制（服务器端）与动态代理（客户端）实现了函数调用。</li>
+<li><strong>网络传输层</strong>：网络传输层描述了Client与Server之间消息传输的方式，Hadoop RPC采用了基于TCP/IP的Socket机制。</li>
+<li><strong>服务器端处理框架</strong>：服务器端处理框架可被抽象为网络I/O模型，它描述了客户端与服务器端间信息交互方式。</li>
+</ul>
+<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><ul>
+<li>动态代理：通过实现InvocationHandler接口实现。<a href="http://www.cnblogs.com/a294098789/p/5601089.html" target="_blank" rel="external">动态代理实现</a></li>
+<li>Java NIO：底层通过多路复用实现的IO。<a href="http://www.cnblogs.com/a294098789/p/5676566.html" target="_blank" rel="external">java nio手动实现简单的http服务器</a></li>
+</ul>
+<h1 id="Hadoop-RPC-Demo"><a href="#Hadoop-RPC-Demo" class="headerlink" title="Hadoop RPC Demo"></a>Hadoop RPC Demo</h1><p>下面先一步一步的使用Hadoop实现的RPC框架来实现RPC调用。</p>
+<ul>
+<li>首先添加Maven依赖，Hadoop RPC主要是在common包中实现。</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.hadoop<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hadoop-common<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>实现ClientProtocol类，该类定义了接口协议，在该接口中，我们定义了两个方法，echo和add。值得注意的是，在Hadoop中所有的协议接口都需要实现VersionedProtocol接口。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.VersionedProtocol;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * RPC Protocol 类</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ClientProtocol</span> <span class="keyword">extends</span> <span class="title">VersionedProtocol</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> versionID = <span class="number">1L</span>;</div><div class="line">    <span class="function">String <span class="title">echo</span><span class="params">(String value)</span> <span class="keyword">throws</span> IOException</span>;</div><div class="line">    <span class="function"><span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> <span class="keyword">throws</span> IOException</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>客户端类，可以看到通过PRC.getProxy方法得到了客户端的代理类，暂时先不管内部的具体实现。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configuration;</div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.RPC;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * 客户端类</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ADDRESS = <span class="string">"localhost"</span>;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">9010</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        Configuration conf = <span class="keyword">new</span> Configuration();</div><div class="line">        <span class="comment">//server ip and port</span></div><div class="line">        InetSocketAddress inetSocketAddress = <span class="keyword">new</span> InetSocketAddress(ADDRESS, PORT);</div><div class="line">        <span class="comment">//get client proxy</span></div><div class="line">        ClientProtocol client = RPC.getProxy(ClientProtocol.class, ClientProtocol.versionID, inetSocketAddress, conf);</div><div class="line">        System.out.println(client.add(<span class="number">3</span>, <span class="number">5</span>));</div><div class="line">        System.out.println(client.echo(<span class="string">"rpc!"</span>));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>现在来到服务端，首先编写具体的实现类ClientProtocolImpl，实现了协议ClientProtocol接口。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.ProtocolSignature;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * 具体实现类</div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClientProtocolImpl</span> <span class="keyword">implements</span> <span class="title">ClientProtocol</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">echo</span><span class="params">(String value)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> value;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> a + b;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getProtocolVersion</span><span class="params">(String s, <span class="keyword">long</span> l)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> ClientProtocol.versionID;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> ProtocolSignature <span class="title">getProtocolSignature</span><span class="params">(String s, <span class="keyword">long</span> l, <span class="keyword">int</span> i)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ProtocolSignature(ClientProtocol.versionID, <span class="keyword">null</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>服务端类，我们可以看见除了ip和port之外，还有一些其他的参数。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.cszjo.hadoop.rpc;</div><div class="line"></div><div class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configuration;</div><div class="line"><span class="keyword">import</span> org.apache.hadoop.ipc.RPC;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by hansiming on 2017/9/8.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ADDRESS = <span class="string">"localhost"</span>;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">9010</span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        Configuration conf = <span class="keyword">new</span> Configuration();</div><div class="line">        <span class="comment">//set server ip, port, protocol instance, protocol, handler num</span></div><div class="line">        org.apache.hadoop.ipc.Server server = <span class="keyword">new</span> RPC.Builder(conf).setBindAddress(ADDRESS)</div><div class="line">                .setPort(PORT).setInstance(<span class="keyword">new</span> ClientProtocolImpl()).setProtocol(ClientProtocol.class)</div><div class="line">                .setNumHandlers(<span class="number">5</span>).build();</div><div class="line">        server.start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>下面我们先启动Server类，在启动Client类去调用Server端，就可以返回我们想要的结果，一个简单的Hadoop RPC就实现了。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">8</div><div class="line">rpc!</div><div class="line"></div><div class="line">Process finished with exit code 0</div></pre></td></tr></table></figure>
+<h1 id="Hadoop-RPC-源码分析"><a href="#Hadoop-RPC-源码分析" class="headerlink" title="Hadoop RPC 源码分析"></a>Hadoop RPC 源码分析</h1><h2 id="Client端"><a href="#Client端" class="headerlink" title="Client端"></a>Client端</h2><p>通过这样的一个方法拿到了Client的代理对象，getProxy()方法存在于RPC类中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ClientProtocol client = RPC.getProxy(ClientProtocol.class, ClientProtocol.versionID, inetSocketAddress, conf);</div></pre></td></tr></table></figure>
+<p>打开RPC类查看源码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">getProxy</span><span class="params">(Class&lt;T&gt; protocol,</span></span></div><div class="line">                                 <span class="keyword">long</span> clientVersion,</div><div class="line">                                 InetSocketAddress addr, Configuration conf)</div><div class="line">     <span class="keyword">throws</span> IOException &#123;</div><div class="line"></div><div class="line">     <span class="keyword">return</span> getProtocolProxy(protocol, clientVersion, addr, conf).getProxy();</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>追着getProtocolProxy方法跟下来。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">ProtocolProxy&lt;T&gt; <span class="title">getProtocolProxy</span><span class="params">(Class&lt;T&gt; protocol,</span></span></div><div class="line">                              <span class="keyword">long</span> clientVersion,</div><div class="line">                              InetSocketAddress addr,</div><div class="line">                              UserGroupInformation ticket,</div><div class="line">                              Configuration conf,</div><div class="line">                              SocketFactory factory,</div><div class="line">                              <span class="keyword">int</span> rpcTimeout,</div><div class="line">                              RetryPolicy connectionRetryPolicy,</div><div class="line">                              AtomicBoolean fallbackToSimpleAuth)</div><div class="line">     <span class="keyword">throws</span> IOException &#123;</div><div class="line">  <span class="keyword">if</span> (UserGroupInformation.isSecurityEnabled()) &#123;</div><div class="line">    SaslRpcServer.init(conf);</div><div class="line">  &#125;</div><div class="line">   <span class="comment">//首先拿到protocol engine，然后再拿到ProtocolProxy</span></div><div class="line">  <span class="keyword">return</span> getProtocolEngine(protocol, conf).getProxy(protocol, clientVersion,</div><div class="line">      addr, ticket, conf, factory, rpcTimeout, connectionRetryPolicy,</div><div class="line">      fallbackToSimpleAuth);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>跟进getProtocolEngine()方法，该方法主要是得到protocol的引擎。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 返回一个rpc的引擎</span></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">synchronized</span> RpcEngine <span class="title">getProtocolEngine</span><span class="params">(Class&lt;?&gt; protocol,</span></span></div><div class="line">    Configuration conf) &#123;</div><div class="line">  <span class="comment">//PROTOCOL_ENGINES private static final Map&lt;Class&lt;?&gt;,RpcEngine&gt; PROTOCOL_ENGINES</span></div><div class="line">  <span class="comment">//PROTOCOL_ENGINES 缓存了protocol类对应的RpcEngine的映射</span></div><div class="line">  RpcEngine engine = PROTOCOL_ENGINES.get(protocol);</div><div class="line">  <span class="keyword">if</span> (engine == <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="comment">//从conf配置中去得到rpc.engine.&#123;protocol_name&#125;</span></div><div class="line">    <span class="comment">//如果没有配置，则默认使用WritableRpcEngine</span></div><div class="line">    Class&lt;?&gt; impl = conf.getClass(ENGINE_PROP+<span class="string">"."</span>+protocol.getName(),</div><div class="line">                                  WritableRpcEngine.class);</div><div class="line">    <span class="comment">//使用反射得到RpcEngine</span></div><div class="line">    engine = (RpcEngine)ReflectionUtils.newInstance(impl, conf);</div><div class="line">    <span class="comment">//加入缓存</span></div><div class="line">    PROTOCOL_ENGINES.put(protocol, engine);</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> engine;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后再是ProtocolEngine的getProxy方法，在Hadoop中默认提供了两种ProtocolEngine，一种是WritableRpcEngine，使用的是Hadoop默认的序列化方式，所有要序列化的对象需要实现Writeable接口，还有一种是ProtobufRpcEngine，使用的是Google的Protocol buffers作为序列化方式。我们这里使用默认的WritableRpcEngine来讲解，进入上面的getProxy方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 构造一个client端的实现了protocol接口的代理对象，该代理对象与指定的server端进行交互</div><div class="line"> */</div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">ProtocolProxy&lt;T&gt; <span class="title">getProxy</span><span class="params">(Class&lt;T&gt; protocol, <span class="keyword">long</span> clientVersion,</span></span></div><div class="line">                       InetSocketAddress addr, UserGroupInformation ticket,</div><div class="line">                       Configuration conf, SocketFactory factory,</div><div class="line">                       <span class="keyword">int</span> rpcTimeout, RetryPolicy connectionRetryPolicy,</div><div class="line">                       AtomicBoolean fallbackToSimpleAuth)</div><div class="line">  <span class="keyword">throws</span> IOException &#123;    </div><div class="line"></div><div class="line">  <span class="keyword">if</span> (connectionRetryPolicy != <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException(</div><div class="line">        <span class="string">"Not supported: connectionRetryPolicy="</span> + connectionRetryPolicy);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="comment">//通过动态代理得到protocol接口的代理对象，关键在与Invoker类，实现了代理对象的具体实现。</span></div><div class="line">  T proxy = (T) Proxy.newProxyInstance(protocol.getClassLoader(),</div><div class="line">      <span class="keyword">new</span> Class[] &#123; protocol &#125;, <span class="keyword">new</span> Invoker(protocol, addr, ticket, conf,</div><div class="line">          factory, rpcTimeout, fallbackToSimpleAuth));</div><div class="line">  <span class="comment">//ProtocolProxy是一个包装类，里面有代理对象和protocol接口类</span></div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> ProtocolProxy&lt;T&gt;(protocol, proxy, <span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们打开关键的Invoker类，该类是WritableRpcEngine类的一个内部类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//实现RpcInvocationHandler，该接口实现了InvocationHandler</span></div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Invoker</span> <span class="keyword">implements</span> <span class="title">RpcInvocationHandler</span> </span>&#123;</div><div class="line">  <span class="comment">// Client类下面的ConnectionId，包含了与server端连接的信息，包括ip，port，ticket，具体的protocol接口等等。</span></div><div class="line">  <span class="keyword">private</span> Client.ConnectionId remoteId;</div><div class="line">  <span class="comment">//Client类</span></div><div class="line">  <span class="keyword">private</span> Client client;</div><div class="line">  </div><div class="line">  ...</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="title">Invoker</span><span class="params">(Class&lt;?&gt; protocol,</span></span></div><div class="line">                 InetSocketAddress address, UserGroupInformation ticket,</div><div class="line">                 Configuration conf, SocketFactory factory,</div><div class="line">                 <span class="keyword">int</span> rpcTimeout, AtomicBoolean fallbackToSimpleAuth)</div><div class="line">      <span class="keyword">throws</span> IOException &#123;</div><div class="line">    <span class="keyword">this</span>.remoteId = Client.ConnectionId.getConnectionId(address, protocol,</div><div class="line">        ticket, rpcTimeout, conf);</div><div class="line">    <span class="comment">//ClientCache CLIENTS=new ClientCache();</span></div><div class="line">    <span class="comment">//ClientCache是一个保存了SocketFactory映射Client的缓存。</span></div><div class="line">    <span class="comment">//如果SocketFactory的key不存在，则重新实例化一个Client类。</span></div><div class="line">    <span class="keyword">this</span>.client = CLIENTS.getClient(conf, factory);</div><div class="line">    <span class="keyword">this</span>.fallbackToSimpleAuth = fallbackToSimpleAuth;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>在一个实现了InvocationHandler接口的类中，最关键的就是invoke方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span></span></div><div class="line">      <span class="keyword">throws</span> Throwable &#123;</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">    ObjectWritable value;</div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//invoke方法最关键的地方就是调用了client的call方法。</span></div><div class="line">        <span class="comment">//也就是代理对象的每个方法，都会调用client的call方法。</span></div><div class="line">        <span class="comment">//其中的参数：RpcKind --&gt; 指定rpc的方式，这里指定了RPC_WRITABLE，如果是ProtoBuf，则指定为RPC_PROTOCOL_BUFFER</span></div><div class="line">        <span class="comment">// rpcRequest --&gt; 指定了Request对象，具体就是需要序列化传到Server端的具体内容，我们可以看到，这里把方法和参数包装在了Invocation的类里。</span></div><div class="line">        <span class="comment">// remoteId --&gt; 类型为ConnectionId</span></div><div class="line">        value = (ObjectWritable)</div><div class="line">          client.call(RPC.RpcKind.RPC_WRITABLE, <span class="keyword">new</span> Invocation(method, args),</div><div class="line">            remoteId, fallbackToSimpleAuth);</div><div class="line">      &#125; </div><div class="line"></div><div class="line">    ...</div></pre></td></tr></table></figure>
+<p>查看Invocation类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//一个方法的实现，包含了方法名和它的参数，实现了Writable接口，所以可以被Hadoop序列化</span></div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Invocation</span> <span class="keyword">implements</span> <span class="title">Writable</span>, <span class="title">Configurable</span> </span>&#123;</div><div class="line">  <span class="comment">//方法名</span></div><div class="line">  <span class="keyword">private</span> String methodName;</div><div class="line">  <span class="comment">//参数类型</span></div><div class="line">  <span class="keyword">private</span> Class&lt;?&gt;[] parameterClasses;</div><div class="line">  <span class="comment">//参数</span></div><div class="line">  <span class="keyword">private</span> Object[] parameters;</div><div class="line"></div><div class="line">  ...</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="title">Invocation</span><span class="params">(Method method, Object[] parameters)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>.methodName = method.getName();</div><div class="line">    <span class="keyword">this</span>.parameterClasses = method.getParameterTypes();</div><div class="line">    <span class="keyword">this</span>.parameters = parameters;</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">  &#125;</div><div class="line"><span class="comment">//在该类中还实现了Writable接口中的write和readFields方法，主要是写和读的具体实现，感兴趣可以查看。</span></div></pre></td></tr></table></figure>
+<p>我们可以看到，最终代理对象执行的是Client类的call方法，所以接下来我们会分析Client这个类，我们先大概看下Client中存在的一些内部类。</p>
+<p><img src="http://www.cszjo.com/images/hadoop_rpc_client.png" alt=""></p>
+<ul>
+<li>Connection：每个Connection都包含了一个和远程地址连接了的socket，Connection是一个线程类，循环的去读server端返回的响应，然后在通知调用者。</li>
+<li>Call：代表了一个RPC调用。</li>
+<li>ConnectionId：一个ConnectionId唯一的标注一个Connection，主要通过以下属性<remoteaddress, protocol,="" ticket=""></remoteaddress,></li>
+</ul>
+<p>接上面的，我们来看看Client的call方法究竟做了什么。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//执行一个rpc调用，传送rpcRequest到服务端，并返回rpc response</span></div><div class="line"><span class="function"><span class="keyword">public</span> Writable <span class="title">call</span><span class="params">(RPC.RpcKind rpcKind, Writable rpcRequest,</span></span></div><div class="line">    ConnectionId remoteId, <span class="keyword">int</span> serviceClass,</div><div class="line">    AtomicBoolean fallbackToSimpleAuth) <span class="keyword">throws</span> IOException &#123;</div><div class="line">  <span class="comment">//创建一个Call对象，一个Call对象就表示了一次Rpc调用，主要是包含了rpcKind，rpcRequest，rpcResponse</span></div><div class="line">  <span class="keyword">final</span> Call call = createCall(rpcKind, rpcRequest);</div><div class="line">  <span class="comment">//得到Connection对象，在getConnection方法里面的setupIOstreams方法最后启动Connection线程</span></div><div class="line">  Connection connection = getConnection(remoteId, call, serviceClass,</div><div class="line">    fallbackToSimpleAuth);</div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">    <span class="comment">// 通过connection对象去发送一次rpc调用</span></div><div class="line">    connection.sendRpcRequest(call);                 <span class="comment">// send the rpc request</span></div><div class="line">  &#125; <span class="keyword">catch</span> (RejectedExecutionException e) &#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"connection has been closed"</span>, e);</div><div class="line">  &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">    Thread.currentThread().interrupt();</div><div class="line">    LOG.warn(<span class="string">"interrupted waiting to send rpc request to server"</span>, e);</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(e);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</div><div class="line">  <span class="keyword">synchronized</span> (call) &#123;</div><div class="line">    <span class="keyword">while</span> (!call.done) &#123;</div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//等待唤醒</span></div><div class="line">        <span class="comment">//Connection线程类会不断的去轮询，查看是否有response到达，如果达到，则会唤醒call</span></div><div class="line">        call.wait();                           <span class="comment">// wait for the result</span></div><div class="line">      &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</div><div class="line">        <span class="comment">// save the fact that we were interrupted</span></div><div class="line">        interrupted = <span class="keyword">true</span>;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (interrupted) &#123;</div><div class="line">      <span class="comment">// set the interrupt flag now that we are done waiting</span></div><div class="line">      Thread.currentThread().interrupt();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (call.error != <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="comment">//调用失败，处理error</span></div><div class="line">      <span class="keyword">if</span> (call.error <span class="keyword">instanceof</span> RemoteException) &#123;</div><div class="line">        call.error.fillInStackTrace();</div><div class="line">        <span class="keyword">throw</span> call.error;</div><div class="line">      &#125; <span class="keyword">else</span> &#123; <span class="comment">// local exception</span></div><div class="line">        InetSocketAddress address = connection.getRemoteAddress();</div><div class="line">        <span class="keyword">throw</span> NetUtils.wrapException(address.getHostName(),</div><div class="line">                address.getPort(),</div><div class="line">                NetUtils.getHostname(),</div><div class="line">                <span class="number">0</span>,</div><div class="line">                call.error);</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      <span class="comment">//返回response</span></div><div class="line">      <span class="keyword">return</span> call.getRpcResponse();</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>来看看Connection类，具体的实现，Connection是一个线程类，我们先看看run方法具体是在执行什么。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">  <span class="keyword">if</span> (LOG.isDebugEnabled())</div><div class="line">    LOG.debug(getName() + <span class="string">": starting, having connections "</span> </div><div class="line">        + connections.size());</div><div class="line"></div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">    <span class="comment">//等待read操作或者关闭connection，如果读到了response，则返回true</span></div><div class="line">    <span class="keyword">while</span> (waitForWork()) &#123;<span class="comment">//wait here for work - read or close connection</span></div><div class="line">      <span class="comment">//接收rpc response</span></div><div class="line">      receiveRpcResponse();</div><div class="line">    &#125;</div><div class="line">  &#125; <span class="keyword">catch</span> (Throwable t) &#123;</div><div class="line">    <span class="comment">// This truly is unexpected, since we catch IOException in receiveResponse</span></div><div class="line">    <span class="comment">// -- this is only to be really sure that we don't leave a client hanging</span></div><div class="line">    <span class="comment">// forever.</span></div><div class="line">    LOG.warn(<span class="string">"Unexpected error reading responses on connection "</span> + <span class="keyword">this</span>, t);</div><div class="line">    markClosed(<span class="keyword">new</span> IOException(<span class="string">"Error reading responses"</span>, t));</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="comment">//关闭连接</span></div><div class="line">  close();</div><div class="line">  </div><div class="line">  <span class="keyword">if</span> (LOG.isDebugEnabled())</div><div class="line">    LOG.debug(getName() + <span class="string">": stopped, remaining connections "</span></div><div class="line">        + connections.size());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>waitForWork方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//1.等待直到有人告诉我们去开始read rpc response 返回true</span></div><div class="line"><span class="comment">//2.空闲了太长的时间，被标记为关闭，最大空闲时间为10s 返回false</span></div><div class="line"><span class="comment">//3.client被标记为不再运行 返回false。</span></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">boolean</span> <span class="title">waitForWork</span><span class="params">()</span> </span>&#123;</div><div class="line">  <span class="comment">//calls表示保存的是当前存活的call</span></div><div class="line">  <span class="comment">//如果calls是空的，则等待maxIdleTime的时间</span></div><div class="line">  <span class="keyword">if</span> (calls.isEmpty() &amp;&amp; !shouldCloseConnection.get()  &amp;&amp; running.get())  &#123;</div><div class="line">    <span class="keyword">long</span> timeout = maxIdleTime-</div><div class="line">          (Time.now()-lastActivity.get());</div><div class="line">    <span class="keyword">if</span> (timeout&gt;<span class="number">0</span>) &#123;</div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">        wait(timeout);</div><div class="line">      &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;&#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="keyword">if</span> (!calls.isEmpty() &amp;&amp; !shouldCloseConnection.get() &amp;&amp; running.get()) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (shouldCloseConnection.get()) &#123;</div><div class="line">    <span class="comment">//连接被关闭</span></div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (calls.isEmpty()) &#123; <span class="comment">// idle connection closed or stopped</span></div><div class="line">    <span class="comment">//超过了最长的等待时间</span></div><div class="line">    markClosed(<span class="keyword">null</span>);</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">// get stopped but there are still pending requests </span></div><div class="line">    markClosed((IOException)<span class="keyword">new</span> IOException().initCause(</div><div class="line">        <span class="keyword">new</span> InterruptedException()));</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>receiveRpcResponse方法就不列出来了，大概就是从流中返序列化出来server端的结果。从上面我们可以看出Connection是一个线程类，会等待结果的返回。Connection的启动方法在getConnection方法里面的setupIOstreams方法最后。下面我们来看Connection类里的另一个关键的方法，sendRpcRequest方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//初始化一个rpc调用，发送一个rpc request到远程的服务端。</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendRpcRequest</span><span class="params">(<span class="keyword">final</span> Call call)</span></span></div><div class="line">    <span class="keyword">throws</span> InterruptedException, IOException &#123;</div><div class="line">  <span class="keyword">if</span> (shouldCloseConnection.get()) &#123;</div><div class="line">    <span class="keyword">return</span>;</div><div class="line">  &#125;</div><div class="line">      <span class="comment">//整个rpc request由三部分组成</span></div><div class="line">  <span class="comment">// 1. header + rpc request的长度</span></div><div class="line">  <span class="comment">// 2. header</span></div><div class="line">  <span class="comment">// 3. rpc request</span></div><div class="line">  <span class="comment">/**</span></div><div class="line">   * 而一个rpc的header由如下组成</div><div class="line">   * +----------------------------------+</div><div class="line">   * |  "hrpc" 4 bytes                  |      </div><div class="line">   * +----------------------------------+</div><div class="line">   * |  Version (1 byte)                |</div><div class="line">   * +----------------------------------+</div><div class="line">   * |  Service Class (1 byte)          |</div><div class="line">   * +----------------------------------+</div><div class="line">   * |  AuthProtocol (1 byte)           |      </div><div class="line">   * +----------------------------------+</div><div class="line">   */</div><div class="line">  <span class="keyword">final</span> DataOutputBuffer d = <span class="keyword">new</span> DataOutputBuffer();</div><div class="line">  <span class="comment">//request header主要包括了rpc的类型</span></div><div class="line">  RpcRequestHeaderProto header = ProtoUtil.makeRpcRequestHeader(</div><div class="line">      call.rpcKind, OperationProto.RPC_FINAL_PACKET, call.id, call.retry,</div><div class="line">      clientId);</div><div class="line">  <span class="comment">//将header写入到outputBuffer缓冲区中</span></div><div class="line">  header.writeDelimitedTo(d);</div><div class="line">  <span class="comment">//将rpcRequest也写入到outputBuffer缓冲区中，跟在header之后</span></div><div class="line">  call.rpcRequest.write(d);</div><div class="line"></div><div class="line">  <span class="keyword">synchronized</span> (sendRpcRequestLock) &#123;</div><div class="line">    <span class="comment">//sendParamsExecutor是Client类的一个线程池对象，所以真实的sendRequest实现并不在Connection类中。</span></div><div class="line">    Future&lt;?&gt; senderFuture = sendParamsExecutor.submit(<span class="keyword">new</span> Runnable() &#123;</div><div class="line">      <span class="meta">@Override</span></div><div class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">          <span class="keyword">synchronized</span> (Connection.<span class="keyword">this</span>.out) &#123;</div><div class="line">            <span class="keyword">if</span> (shouldCloseConnection.get()) &#123;</div><div class="line">              <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (LOG.isDebugEnabled())</div><div class="line">              LOG.debug(getName() + <span class="string">" sending #"</span> + call.id);</div><div class="line">     </div><div class="line">            <span class="keyword">byte</span>[] data = d.getData();</div><div class="line">            <span class="keyword">int</span> totalLength = d.getLength();</div><div class="line">            <span class="comment">//out是保存在Connection中的DataOutputStream对象</span></div><div class="line">            <span class="comment">//先写入这次rpc调用的request的总的大小</span></div><div class="line">            out.writeInt(totalLength); <span class="comment">// Total Length</span></div><div class="line">            <span class="comment">//写入rpcRequestHeader和rpcRequest</span></div><div class="line">            out.write(data, <span class="number">0</span>, totalLength);<span class="comment">// RpcRequestHeader + RpcRequest</span></div><div class="line">            out.flush();</div><div class="line">          &#125;</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">          <span class="comment">// exception at this point would leave the connection in an</span></div><div class="line">          <span class="comment">// unrecoverable state (eg half a call left on the wire).</span></div><div class="line">          <span class="comment">// So, close the connection, killing any outstanding calls</span></div><div class="line">          markClosed(e);</div><div class="line">        &#125; <span class="keyword">finally</span> &#123;</div><div class="line">          <span class="comment">//the buffer is just an in-memory buffer, but it is still polite to</span></div><div class="line">          <span class="comment">// close early</span></div><div class="line">          IOUtils.closeStream(d);</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;);</div><div class="line">  </div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">      senderFuture.get();</div><div class="line">    &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</div><div class="line">      Throwable cause = e.getCause();</div><div class="line">      </div><div class="line">      <span class="comment">// cause should only be a RuntimeException as the Runnable above</span></div><div class="line">      <span class="comment">// catches IOException</span></div><div class="line">      <span class="keyword">if</span> (cause <span class="keyword">instanceof</span> RuntimeException) &#123;</div><div class="line">        <span class="keyword">throw</span> (RuntimeException) cause;</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"unexpected checked exception"</span>, cause);</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>好了，整个client端的大概思路就是这样，重点是通过动态代理得到新的对象，然后选定rpc引擎，将调用的方法名，方法参数传给服务端。</p>
+<h2 id="Server端"><a href="#Server端" class="headerlink" title="Server端"></a>Server端</h2><p>因为Server端涉及到多个客户端的调用，所以使用了如下的设计，统称为Reactor设计模式。</p>
+<p><img src="http://www.cszjo.com/images/hadoop_rpc_server.png" alt=""></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/YARN/" rel="tag"># YARN</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/02/mysql_backup/" rel="next" title="Mysql的备份和还原">
+                <i class="fa fa-chevron-left"></i> Mysql的备份和还原
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="韩思明" />
+          <p class="site-author-name" itemprop="name">韩思明</p>
+           
+              <p class="site-description motion-element" itemprop="description">专注于大数据，云计算，Java后端</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hansiming" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RPC简介"><span class="nav-number">1.</span> <span class="nav-text">RPC简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#预备知识"><span class="nav-number">1.1.</span> <span class="nav-text">预备知识</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hadoop-RPC-Demo"><span class="nav-number">2.</span> <span class="nav-text">Hadoop RPC Demo</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hadoop-RPC-源码分析"><span class="nav-number">3.</span> <span class="nav-text">Hadoop RPC 源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Client端"><span class="nav-number">3.1.</span> <span class="nav-text">Client端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server端"><span class="nav-number">3.2.</span> <span class="nav-text">Server端</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">韩思明</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
